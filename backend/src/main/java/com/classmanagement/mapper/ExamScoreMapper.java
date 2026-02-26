@@ -1,0 +1,10 @@
+package com.classmanagement.mapper;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.classmanagement.entity.ExamScore;
+import org.apache.ibatis.annotations.Mapper;
+
+@Mapper
+public interface ExamScoreMapper extends BaseMapper<ExamScore> {
+}
+
