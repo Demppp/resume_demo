@@ -1,7 +1,7 @@
 spring:
   application:
     name: class-management-system
-  
+  #测试提交
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://111.228.5.192:3306/resume_demo?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
