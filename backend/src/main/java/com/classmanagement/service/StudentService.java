@@ -32,6 +32,9 @@ public class StudentService {
             wrapper.eq(Student::getClassType, classType);
         }
         
+        // 按ID倒序排列，最新添加的在前面
+        wrapper.orderByDesc(Student::getId);
+        
         return studentMapper.selectPage(page, wrapper);
     }
     
