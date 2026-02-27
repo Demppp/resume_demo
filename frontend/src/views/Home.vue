@@ -13,6 +13,10 @@
           text-color="#ecf0f1"
           active-text-color="#3498db"
         >
+          <el-menu-item index="/dashboard">
+            <el-icon><DataBoard /></el-icon>
+            <span>数据看板</span>
+          </el-menu-item>
           <el-menu-item index="/student">
             <el-icon><User /></el-icon>
             <span>学生管理</span>
@@ -28,6 +32,14 @@
           <el-menu-item index="/diary">
             <el-icon><Notebook /></el-icon>
             <span>班干部日志</span>
+          </el-menu-item>
+          <el-menu-item index="/warning">
+            <el-icon><Warning /></el-icon>
+            <span>预警系统</span>
+          </el-menu-item>
+          <el-menu-item index="/analytics">
+            <el-icon><DataAnalysis /></el-icon>
+            <span>数据分析</span>
           </el-menu-item>
         </el-menu>
       </el-aside>
@@ -120,11 +132,16 @@ import axios from 'axios'
 
 const route = useRoute()
 const router = useRouter()
-const activeMenu = ref('/student')
+const activeMenu = ref('/dashboard')
 const aiSearchVisible = ref(false)
 const aiSearchQuery = ref('')
 const aiSearchLoading = ref(false)
 const aiSearchResult = ref(null)
+
+// 初始化时跳转到dashboard
+if (route.path === '/home' || route.path === '/') {
+  router.push('/dashboard')
+}
 
 const showAiSearch = () => {
   aiSearchVisible.value = true
@@ -184,6 +201,7 @@ watch(() => route.path, (newPath) => {
 .home-container {
   height: 100vh;
   overflow: hidden;
+  background: #f0f2f5;
 }
 
 .el-container {
@@ -191,41 +209,61 @@ watch(() => route.path, (newPath) => {
 }
 
 .el-aside {
-  background-color: #2c3e50;
-  color: #ecf0f1;
+  background: #001529;
+  color: #fff;
   overflow-x: hidden;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
 }
 
 .logo {
-  padding: 30px 20px;
+  padding: 24px 16px;
   text-align: center;
-  background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-  border-bottom: 3px solid #2980b9;
+  background: #002140;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .logo h2 {
-  font-size: 22px;
-  margin-bottom: 8px;
+  font-size: 20px;
+  margin-bottom: 4px;
   color: #fff;
   font-weight: 600;
+  letter-spacing: 1px;
 }
 
 .logo p {
-  font-size: 13px;
-  color: #ecf0f1;
-  opacity: 0.9;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.65);
 }
 
 .el-menu {
   border: none;
+  background: #001529;
+}
+
+:deep(.el-menu-item) {
+  color: rgba(255, 255, 255, 0.65);
+  margin: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.3s;
+}
+
+:deep(.el-menu-item:hover) {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #fff;
+}
+
+:deep(.el-menu-item.is-active) {
+  background: #1890ff !important;
+  color: #fff;
 }
 
 .el-header {
   background: #fff;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
   display: flex;
   align-items: center;
-  padding: 0 30px;
+  padding: 0 24px;
+  z-index: 10;
 }
 
 .header-content {
@@ -236,16 +274,24 @@ watch(() => route.path, (newPath) => {
 }
 
 .header-content h3 {
-  font-size: 20px;
-  color: #2c3e50;
-  font-weight: 600;
+  font-size: 18px;
+  color: #001529;
+  font-weight: 500;
 }
 
 .header-info {
-  color: #7f8c8d;
-  font-size: 14px;
   display: flex;
   align-items: center;
+  gap: 16px;
+}
+
+.header-info span {
+  color: rgba(0, 0, 0, 0.65);
+  font-size: 14px;
+}
+
+.header-info .el-button {
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.2);
 }
 
 .ai-search-container {
@@ -263,14 +309,14 @@ watch(() => route.path, (newPath) => {
 
 .ai-search-container ul li:before {
   content: "• ";
-  color: #409eff;
+  color: #1890ff;
   font-weight: bold;
   margin-right: 5px;
 }
 
 .el-main {
-  background: #f5f7fa;
-  padding: 20px;
+  background: #f0f2f5;
+  padding: 24px;
   overflow-y: auto;
 }
 </style>

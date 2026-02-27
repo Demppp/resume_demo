@@ -5,8 +5,8 @@
       <el-col :span="6">
         <el-card shadow="hover" class="stat-card">
           <div class="stat-content">
-            <div class="stat-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-              <el-icon :size="30"><TrendCharts /></el-icon>
+            <div class="stat-icon" style="background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);">
+              <el-icon :size="28"><TrendCharts /></el-icon>
             </div>
             <div class="stat-info">
               <div class="stat-value">{{ stats.totalStudents }}</div>
@@ -18,8 +18,8 @@
       <el-col :span="6">
         <el-card shadow="hover" class="stat-card">
           <div class="stat-content">
-            <div class="stat-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-              <el-icon :size="30"><Trophy /></el-icon>
+            <div class="stat-icon" style="background: linear-gradient(135deg, #52c41a 0%, #389e0d 100%);">
+              <el-icon :size="28"><Trophy /></el-icon>
             </div>
             <div class="stat-info">
               <div class="stat-value">{{ stats.excellentCount }}</div>
@@ -31,8 +31,8 @@
       <el-col :span="6">
         <el-card shadow="hover" class="stat-card">
           <div class="stat-content">
-            <div class="stat-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
-              <el-icon :size="30"><DataLine /></el-icon>
+            <div class="stat-icon" style="background: linear-gradient(135deg, #faad14 0%, #d48806 100%);">
+              <el-icon :size="28"><DataLine /></el-icon>
             </div>
             <div class="stat-info">
               <div class="stat-value">{{ stats.averageScore }}</div>
@@ -44,8 +44,8 @@
       <el-col :span="6">
         <el-card shadow="hover" class="stat-card">
           <div class="stat-content">
-            <div class="stat-icon" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
-              <el-icon :size="30"><Warning /></el-icon>
+            <div class="stat-icon" style="background: linear-gradient(135deg, #f5222d 0%, #cf1322 100%);">
+              <el-icon :size="28"><Warning /></el-icon>
             </div>
             <div class="stat-info">
               <div class="stat-value">{{ stats.needAttentionCount }}</div>
@@ -69,6 +69,9 @@
 
       <div class="search-bar">
         <el-form :inline="true">
+          <el-form-item label="学生姓名">
+            <el-input v-model="searchForm.studentName" placeholder="请输入学生姓名" clearable style="width: 150px;" />
+          </el-form-item>
           <el-form-item label="班级">
             <el-select v-model="searchForm.className" placeholder="请选择班级" clearable>
               <el-option label="一班" value="一班" />
@@ -80,7 +83,7 @@
             </el-select>
           </el-form-item>
           <el-form-item label="考试名称">
-            <el-input v-model="searchForm.examName" placeholder="请输入考试名称" clearable />
+            <el-input v-model="searchForm.examName" placeholder="请输入考试名称" clearable style="width: 150px;" />
           </el-form-item>
           <el-form-item label="重点关注">
             <el-select v-model="focusFilter" placeholder="筛选学生" clearable @change="handleSearch">
@@ -291,6 +294,7 @@ const stats = reactive({
 })
 
 const searchForm = reactive({
+  studentName: '',
   className: '',
   examName: ''
 })
@@ -415,6 +419,7 @@ const handleSearch = () => {
 }
 
 const handleReset = () => {
+  searchForm.studentName = ''
   searchForm.className = ''
   searchForm.examName = ''
   focusFilter.value = ''
@@ -493,8 +498,7 @@ onMounted(() => {
     searchForm.className = route.query.className
   }
   if (route.query.studentName) {
-    // 如果有学生姓名，可以在这里处理
-    // 暂时先加载数据，前端筛选
+    searchForm.studentName = route.query.studentName
   }
   
   loadData()
@@ -529,25 +533,27 @@ onMounted(() => {
 }
 
 .stat-card {
-  border-radius: 12px;
+  border-radius: 8px;
   transition: all 0.3s;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .stat-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
 }
 
 .stat-content {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 16px;
 }
 
 .stat-icon {
-  width: 60px;
-  height: 60px;
-  border-radius: 12px;
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -559,29 +565,45 @@ onMounted(() => {
 }
 
 .stat-value {
-  font-size: 28px;
+  font-size: 26px;
   font-weight: 700;
-  color: #2c3e50;
+  color: #262626;
   line-height: 1;
-  margin-bottom: 5px;
+  margin-bottom: 6px;
 }
 
 .stat-label {
   font-size: 13px;
-  color: #7f8c8d;
+  color: #8c8c8c;
 }
 
 :deep(.top-student-row) {
-  background-color: #f0f9ff !important;
-  font-weight: 600;
+  background-color: #e6f7ff !important;
 }
 
 :deep(.need-attention-row) {
-  background-color: #fef0f0 !important;
+  background-color: #fff1f0 !important;
 }
 
 :deep(.el-table__row:hover) {
-  background-color: #ecf5ff !important;
+  background-color: #fafafa !important;
+}
+
+:deep(.el-card) {
+  border-radius: 8px;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+:deep(.el-card__header) {
+  border-bottom: 1px solid #f0f0f0;
+  padding: 16px 20px;
+}
+
+:deep(.el-table__header th) {
+  background: #fafafa !important;
+  color: #262626;
+  font-weight: 600;
 }
 </style>
 

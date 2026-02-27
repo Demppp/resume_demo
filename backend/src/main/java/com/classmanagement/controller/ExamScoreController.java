@@ -21,8 +21,9 @@ public class ExamScoreController {
             @RequestParam(defaultValue = "1") int pageNum,
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(required = false) String className,
-            @RequestParam(required = false) String examName) {
-        Page<ExamScore> page = examScoreService.getExamScoreList(pageNum, pageSize, className, examName);
+            @RequestParam(required = false) String examName,
+            @RequestParam(required = false) String studentName) {
+        Page<ExamScore> page = examScoreService.getExamScoreList(pageNum, pageSize, className, examName, studentName);
         return Result.success(page);
     }
     

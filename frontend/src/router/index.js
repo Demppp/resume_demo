@@ -11,6 +11,11 @@ const routes = [
     component: () => import('@/views/Home.vue'),
     children: [
       {
+        path: '/dashboard',
+        name: 'Dashboard',
+        component: () => import('@/views/Dashboard.vue')
+      },
+      {
         path: '/student',
         name: 'Student',
         component: () => import('@/views/Student.vue')
@@ -29,6 +34,16 @@ const routes = [
         path: '/diary',
         name: 'Diary',
         component: () => import('@/views/Diary.vue')
+      },
+      {
+        path: '/warning',
+        name: 'Warning',
+        component: () => import('@/views/Warning.vue')
+      },
+      {
+        path: '/analytics',
+        name: 'Analytics',
+        component: () => import('@/views/Analytics.vue')
       }
     ]
   }

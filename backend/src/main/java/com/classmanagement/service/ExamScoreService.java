@@ -17,7 +17,7 @@ public class ExamScoreService {
     
     private final ExamScoreMapper examScoreMapper;
     
-    public Page<ExamScore> getExamScoreList(int pageNum, int pageSize, String className, String examName) {
+    public Page<ExamScore> getExamScoreList(int pageNum, int pageSize, String className, String examName, String studentName) {
         Page<ExamScore> page = new Page<>(pageNum, pageSize);
         LambdaQueryWrapper<ExamScore> wrapper = new LambdaQueryWrapper<>();
         
@@ -26,6 +26,9 @@ public class ExamScoreService {
         }
         if (examName != null && !examName.isEmpty()) {
             wrapper.eq(ExamScore::getExamName, examName);
+        }
+        if (studentName != null && !studentName.isEmpty()) {
+            wrapper.like(ExamScore::getStudentName, studentName);
         }
         
         wrapper.orderByDesc(ExamScore::getExamDate);
