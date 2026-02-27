@@ -70,7 +70,7 @@
       <!-- 预警列表 -->
       <el-tabs v-model="activeTab" type="card">
         <el-tab-pane label="全部预警" name="all">
-          <el-table :data="allWarnings" stripe style="width: 100%">
+          <el-table :data="paginatedWarnings" stripe style="width: 100%">
             <el-table-column prop="studentName" label="学生姓名" width="100" align="center">
               <template #default="{ row }">
                 <span style="font-weight: 600;">{{ row.studentName }}</span>
@@ -108,6 +108,15 @@
               </template>
             </el-table-column>
           </el-table>
+          <div class="pagination">
+            <el-pagination
+              v-model:current-page="pagination.pageNum"
+              v-model:page-size="pagination.pageSize"
+              :total="allWarnings.length"
+              :page-sizes="[10, 20, 50, 100]"
+              layout="total, sizes, prev, pager, next, jumper"
+            />
+          </div>
         </el-tab-pane>
 
         <el-tab-pane label="成绩下降" name="score">
@@ -208,10 +217,16 @@
 import { ref, reactive, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { Warning, TrendCharts, Calendar, DataLine } from '@element-plus/icons-vue'
 import axios from 'axios'
 
 const router = useRouter()
 const activeTab = ref('all')
+
+const pagination = reactive({
+  pageNum: 1,
+  pageSize: 10
+})
 
 const warningStats = reactive({
   totalWarnings: 0,
@@ -224,6 +239,12 @@ const allWarnings = ref([])
 const scoreWarnings = computed(() => allWarnings.value.filter(w => w.warningType === '成绩下降'))
 const attendanceWarnings = computed(() => allWarnings.value.filter(w => w.warningType === '考勤异常'))
 const lowScoreWarnings = computed(() => allWarnings.value.filter(w => w.warningType === '成绩偏低'))
+
+const paginatedWarnings = computed(() => {
+  const start = (pagination.pageNum - 1) * pagination.pageSize
+  const end = start + pagination.pageSize
+  return allWarnings.value.slice(start, end)
+})
 
 const loadWarnings = async () => {
   try {
@@ -358,6 +379,12 @@ onMounted(() => {
 .stat-label {
   font-size: 13px;
   color: #8c8c8c;
+}
+
+.pagination {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
 }
 
 :deep(.el-card) {

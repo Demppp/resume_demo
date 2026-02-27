@@ -179,7 +179,37 @@
           <el-table-column prop="chineseScore" label="语文" width="80" align="center" />
           <el-table-column prop="mathScore" label="数学" width="80" align="center" />
           <el-table-column prop="englishScore" label="英语" width="80" align="center" />
-          <el-table-column prop="comprehensiveScore" label="文综/理综" width="100" align="center" />
+          <el-table-column prop="comprehensiveScore" label="文综/理综" width="100" align="center">
+            <template #default="{ row }">
+              <el-popover
+                placement="top"
+                :width="200"
+                trigger="hover"
+              >
+                <template #reference>
+                  <span style="cursor: pointer; color: #409eff;">{{ row.comprehensiveScore }}</span>
+                </template>
+                <div v-if="row.classType === '理科'" style="line-height: 1.8;">
+                  <div><strong>理综详情：</strong></div>
+                  <div>物理：{{ row.physicsScore }}</div>
+                  <div>化学：{{ row.chemistryScore }}</div>
+                  <div>生物：{{ row.biologyScore }}</div>
+                  <div style="border-top: 1px solid #eee; margin-top: 5px; padding-top: 5px;">
+                    <strong>总分：{{ row.comprehensiveScore }}</strong>
+                  </div>
+                </div>
+                <div v-else style="line-height: 1.8;">
+                  <div><strong>文综详情：</strong></div>
+                  <div>政治：{{ row.politicsScore }}</div>
+                  <div>历史：{{ row.historyScore }}</div>
+                  <div>地理：{{ row.geographyScore }}</div>
+                  <div style="border-top: 1px solid #eee; margin-top: 5px; padding-top: 5px;">
+                    <strong>总分：{{ row.comprehensiveScore }}</strong>
+                  </div>
+                </div>
+              </el-popover>
+            </template>
+          </el-table-column>
           <el-table-column prop="totalScore" label="总分" width="90" align="center">
             <template #default="{ row }">
               <span style="font-weight: 700; color: #e74c3c;">{{ row.totalScore }}</span>

@@ -1,10 +1,10 @@
-package com.example.demo.service;
+package com.classmanagement.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.example.demo.entity.ExamScore;
-import com.example.demo.entity.Student;
-import com.example.demo.mapper.ExamScoreMapper;
-import com.example.demo.mapper.StudentMapper;
+import com.classmanagement.entity.ExamScore;
+import com.classmanagement.entity.Student;
+import com.classmanagement.mapper.ExamScoreMapper;
+import com.classmanagement.mapper.StudentMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -65,15 +65,12 @@ public class AnalyticsService {
             List<Double> avgScores = new ArrayList<>();
             for (String examName : exams) {
                 QueryWrapper<ExamScore> wrapper = new QueryWrapper<>();
-                wrapper.eq("exam_name", examName);
+                wrapper.eq("exam_name", examName)
+                       .eq("class_name", className);
                 List<ExamScore> scores = examScoreMapper.selectList(wrapper);
 
                 double avg = scores.stream()
-                    .filter(s -> {
-                        Student student = studentMapper.selectById(s.getStudentId());
-                        return student != null && className.equals(student.getClassName());
-                    })
-                    .mapToInt(s -> s.getChinese() + s.getMath() + s.getEnglish() + s.getComprehensive())
+                    .mapToDouble(s -> s.getTotalScore().doubleValue())
                     .average()
                     .orElse(0);
 
@@ -101,15 +98,15 @@ public class AnalyticsService {
         List<ExamScore> scores = examScoreMapper.selectList(wrapper);
 
         // 统计各科在各分数段的人数
-        data.put("chinese", countByRange(scores.stream().map(ExamScore::getChinese).collect(Collectors.toList())));
-        data.put("math", countByRange(scores.stream().map(ExamScore::getMath).collect(Collectors.toList())));
-        data.put("english", countByRange(scores.stream().map(ExamScore::getEnglish).collect(Collectors.toList())));
-        data.put("comprehensive", countByRange(scores.stream().map(ExamScore::getComprehensive).collect(Collectors.toList())));
+        data.put("chinese", countByRange(scores.stream().map(s -> s.getChineseScore().doubleValue()).collect(Collectors.toList())));
+        data.put("math", countByRange(scores.stream().map(s -> s.getMathScore().doubleValue()).collect(Collectors.toList())));
+        data.put("english", countByRange(scores.stream().map(s -> s.getEnglishScore().doubleValue()).collect(Collectors.toList())));
+        data.put("comprehensive", countByRange(scores.stream().map(s -> s.getComprehensiveScore().doubleValue()).collect(Collectors.toList())));
 
         return data;
     }
 
-    private List<Integer> countByRange(List<Integer> scores) {
+    private List<Integer> countByRange(List<Double> scores) {
         List<Integer> counts = new ArrayList<>();
         counts.add((int) scores.stream().filter(s -> s >= 0 && s < 60).count());
         counts.add((int) scores.stream().filter(s -> s >= 60 && s < 90).count());
@@ -122,8 +119,9 @@ public class AnalyticsService {
     // 获取学生名单
     private List<String> getStudentNames() {
         return studentMapper.selectList(null).stream()
-            .map(Student::getName)
+            .map(Student::getStudentName)
             .sorted()
+            .limit(50)
             .collect(Collectors.toList());
     }
 
@@ -133,10 +131,13 @@ public class AnalyticsService {
 
         // 获取学生
         QueryWrapper<Student> studentWrapper = new QueryWrapper<>();
-        studentWrapper.eq("name", studentName);
+        studentWrapper.eq("student_name", studentName);
         Student student = studentMapper.selectOne(studentWrapper);
 
         if (student == null) {
+            data.put("exams", new ArrayList<>());
+            data.put("classRanking", new ArrayList<>());
+            data.put("gradeRanking", new ArrayList<>());
             return data;
         }
 
@@ -164,21 +165,16 @@ public class AnalyticsService {
                 .orElse(null);
 
             if (studentScore != null) {
-                int studentTotal = studentScore.getChinese() + studentScore.getMath() + 
-                                  studentScore.getEnglish() + studentScore.getComprehensive();
+                double studentTotal = studentScore.getTotalScore().doubleValue();
 
                 // 计算班级排名
                 List<ExamScore> classScores = allScores.stream()
-                    .filter(s -> {
-                        Student st = studentMapper.selectById(s.getStudentId());
-                        return st != null && st.getClassName().equals(student.getClassName());
-                    })
+                    .filter(s -> s.getClassName().equals(student.getClassName()))
                     .collect(Collectors.toList());
 
                 int classRank = 1;
                 for (ExamScore score : classScores) {
-                    int total = score.getChinese() + score.getMath() + score.getEnglish() + score.getComprehensive();
-                    if (total > studentTotal) {
+                    if (score.getTotalScore().doubleValue() > studentTotal) {
                         classRank++;
                     }
                 }
@@ -187,8 +183,7 @@ public class AnalyticsService {
                 // 计算年级排名
                 int gradeRank = 1;
                 for (ExamScore score : allScores) {
-                    int total = score.getChinese() + score.getMath() + score.getEnglish() + score.getComprehensive();
-                    if (total > studentTotal) {
+                    if (score.getTotalScore().doubleValue() > studentTotal) {
                         gradeRank++;
                     }
                 }
@@ -215,15 +210,12 @@ public class AnalyticsService {
         Map<String, List<ExamScore>> scoresByClass = new HashMap<>();
 
         for (ExamScore score : scores) {
-            Student student = studentMapper.selectById(score.getStudentId());
-            if (student != null) {
-                scoresByClass.computeIfAbsent(student.getClassName(), k -> new ArrayList<>()).add(score);
-            }
+            scoresByClass.computeIfAbsent(score.getClassName(), k -> new ArrayList<>()).add(score);
         }
 
         for (Map.Entry<String, List<ExamScore>> entry : scoresByClass.entrySet()) {
             double avg = entry.getValue().stream()
-                .mapToInt(s -> s.getChinese() + s.getMath() + s.getEnglish() + s.getComprehensive())
+                .mapToDouble(s -> s.getTotalScore().doubleValue())
                 .average()
                 .orElse(0);
             classAvgMap.put(entry.getKey(), avg);
@@ -231,11 +223,8 @@ public class AnalyticsService {
 
         // 识别风险学生
         for (ExamScore score : scores) {
-            Student student = studentMapper.selectById(score.getStudentId());
-            if (student == null) continue;
-
-            int totalScore = score.getChinese() + score.getMath() + score.getEnglish() + score.getComprehensive();
-            double classAvg = classAvgMap.getOrDefault(student.getClassName(), 0.0);
+            double totalScore = score.getTotalScore().doubleValue();
+            double classAvg = classAvgMap.getOrDefault(score.getClassName(), 0.0);
 
             // 判断风险等级
             String riskLevel = null;
@@ -243,19 +232,19 @@ public class AnalyticsService {
 
             if (classAvg - totalScore >= 50) {
                 riskLevel = "高风险";
-                riskReason = String.format("总分%d分，低于班级平均分%.1f分", totalScore, classAvg - totalScore);
+                riskReason = String.format("总分%.0f分，低于班级平均分%.1f分", totalScore, classAvg - totalScore);
             } else if (classAvg - totalScore >= 30) {
                 riskLevel = "中风险";
-                riskReason = String.format("总分%d分，低于班级平均分%.1f分", totalScore, classAvg - totalScore);
+                riskReason = String.format("总分%.0f分，低于班级平均分%.1f分", totalScore, classAvg - totalScore);
             } else if (totalScore < 400) {
                 riskLevel = "低风险";
-                riskReason = String.format("总分%d分，需要加强辅导", totalScore);
+                riskReason = String.format("总分%.0f分，需要加强辅导", totalScore);
             }
 
             if (riskLevel != null) {
                 Map<String, Object> riskStudent = new HashMap<>();
-                riskStudent.put("studentName", student.getName());
-                riskStudent.put("className", student.getClassName());
+                riskStudent.put("studentName", score.getStudentName());
+                riskStudent.put("className", score.getClassName());
                 riskStudent.put("riskLevel", riskLevel);
                 riskStudent.put("riskReason", riskReason);
                 riskStudents.add(riskStudent);

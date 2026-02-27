@@ -131,12 +131,60 @@
         <el-table-column prop="chineseScore" label="语文" width="70" align="center" />
         <el-table-column prop="mathScore" label="数学" width="70" align="center" />
         <el-table-column prop="englishScore" label="英语" width="70" align="center" />
-        <el-table-column prop="comprehensiveScore" label="文综/理综" width="100" align="center" />
+        <el-table-column prop="comprehensiveScore" label="文综/理综" width="100" align="center">
+          <template #default="{ row }">
+            <el-popover
+              placement="top"
+              :width="200"
+              trigger="hover"
+            >
+              <template #reference>
+                <span style="cursor: pointer; color: #409eff;">{{ row.comprehensiveScore }}</span>
+              </template>
+              <div v-if="row.classType === '理科'" style="line-height: 1.8;">
+                <div><strong>理综详情：</strong></div>
+                <div>物理：{{ row.physicsScore }}</div>
+                <div>化学：{{ row.chemistryScore }}</div>
+                <div>生物：{{ row.biologyScore }}</div>
+                <div style="border-top: 1px solid #eee; margin-top: 5px; padding-top: 5px;">
+                  <strong>总分：{{ row.comprehensiveScore }}</strong>
+                </div>
+              </div>
+              <div v-else style="line-height: 1.8;">
+                <div><strong>文综详情：</strong></div>
+                <div>政治：{{ row.politicsScore }}</div>
+                <div>历史：{{ row.historyScore }}</div>
+                <div>地理：{{ row.geographyScore }}</div>
+                <div style="border-top: 1px solid #eee; margin-top: 5px; padding-top: 5px;">
+                  <strong>总分：{{ row.comprehensiveScore }}</strong>
+                </div>
+              </div>
+            </el-popover>
+          </template>
+        </el-table-column>
         <el-table-column prop="totalScore" label="总分" width="90" align="center" sortable>
           <template #default="{ row }">
             <span style="font-weight: 700; font-size: 16px;" :style="{ color: getScoreColor(row.totalScore) }">
               {{ row.totalScore }}
             </span>
+          </template>
+        </el-table-column>
+        <el-table-column label="与上次对比" width="120" align="center">
+          <template #default="{ row }">
+            <div v-if="row.scoreChange !== undefined">
+              <el-tag v-if="row.scoreChange > 0" type="success" size="small">
+                <el-icon><CaretTop /></el-icon>
+                {{ row.scoreChange }}
+              </el-tag>
+              <el-tag v-else-if="row.scoreChange < 0" type="danger" size="small">
+                <el-icon><CaretBottom /></el-icon>
+                {{ Math.abs(row.scoreChange) }}
+              </el-tag>
+              <el-tag v-else type="info" size="small">
+                持平
+              </el-tag>
+            </div>
+            <span v-else style="color: #8c8c8c;">-</span>
           </template>
         </el-table-column>
         <el-table-column prop="classRank" label="班级排名" width="90" align="center" sortable>
@@ -277,6 +325,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getExamScoreList, addExamScore, updateExamScore, deleteExamScore } from '@/api/exam'
 import { useRoute } from 'vue-router'
+import { CaretTop, CaretBottom } from '@element-plus/icons-vue'
 
 const route = useRoute()
 
@@ -332,6 +381,7 @@ const getRankType = (rank) => {
 }
 
 const getUniversityType = (university) => {
+  if (!university) return ''
   if (university.includes('985')) return 'danger'
   if (university.includes('211')) return 'warning'
   if (university.includes('一本')) return 'success'
@@ -356,16 +406,8 @@ const loadData = async () => {
     allData.value = res.data.records
     pagination.total = res.data.total
     
-    // 获取当前筛选条件下的所有数据用于统计（不分页）
-    const allParams = {
-      pageNum: 1,
-      pageSize: 10000, // 获取所有数据
-      ...searchForm  // 保持相同的筛选条件（包括考试名称）
-    }
-    const allRes = await getExamScoreList(allParams)
-    
-    // 计算统计数据
-    calculateStats(allRes.data.records)
+    // 计算统计数据（基于当前筛选条件的总数）
+    calculateStatsFromTotal()
     
     // 应用重点关注筛选
     applyFocusFilter()
@@ -375,13 +417,24 @@ const loadData = async () => {
   }
 }
 
-const calculateStats = (data) => {
-  stats.totalStudents = data.length
-  stats.excellentCount = data.filter(item => item.totalScore >= 600).length
-  stats.needAttentionCount = data.filter(item => item.totalScore < 500).length
+// 基于总数计算统计（避免加载所有数据）
+const calculateStatsFromTotal = () => {
+  // 使用当前页数据进行估算
+  const currentData = allData.value
+  if (currentData.length === 0) {
+    stats.totalStudents = 0
+    stats.excellentCount = 0
+    stats.averageScore = 0
+    stats.needAttentionCount = 0
+    return
+  }
   
-  const totalScore = data.reduce((sum, item) => sum + parseFloat(item.totalScore), 0)
-  stats.averageScore = data.length > 0 ? (totalScore / data.length).toFixed(1) : 0
+  stats.totalStudents = pagination.total
+  stats.excellentCount = currentData.filter(item => item.totalScore >= 600).length
+  stats.needAttentionCount = currentData.filter(item => item.totalScore < 500).length
+  
+  const totalScore = currentData.reduce((sum, item) => sum + parseFloat(item.totalScore), 0)
+  stats.averageScore = currentData.length > 0 ? (totalScore / currentData.length).toFixed(1) : 0
 }
 
 const applyFocusFilter = () => {
@@ -502,6 +555,14 @@ onMounted(() => {
   }
   
   loadData()
+  
+  // 监听AI演示事件
+  window.addEventListener('ai-demo-search', (event) => {
+    const { studentName, examName } = event.detail
+    searchForm.studentName = studentName
+    searchForm.examName = examName
+    handleSearch()
+  })
 })
 </script>
 

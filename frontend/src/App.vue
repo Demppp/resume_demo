@@ -1,10 +1,12 @@
 <template>
   <div id="app">
     <router-view />
+    <AIRobot />
   </div>
 </template>
 
 <script setup>
+import AIRobot from './components/AIRobot.vue'
 </script>
 
 <style>

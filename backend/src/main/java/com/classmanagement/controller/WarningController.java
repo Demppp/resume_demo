@@ -1,7 +1,7 @@
-package com.example.demo.controller;
+package com.classmanagement.controller;
 
-import com.example.demo.dto.WarningDTO;
-import com.example.demo.service.WarningService;
+import com.classmanagement.dto.WarningDTO;
+import com.classmanagement.service.WarningService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/warning")
+@RequestMapping("/warning")
 @CrossOrigin
 public class WarningController {
 

@@ -1,6 +1,6 @@
-package com.example.demo.controller;
+package com.classmanagement.controller;
 
-import com.example.demo.service.AnalyticsService;
+import com.classmanagement.service.AnalyticsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/analytics")
+@RequestMapping("/analytics")
 @CrossOrigin
 public class AnalyticsController {
 

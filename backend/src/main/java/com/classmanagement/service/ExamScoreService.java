@@ -2,6 +2,7 @@ package com.classmanagement.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.classmanagement.dto.ExamScoreDTO;
 import com.classmanagement.entity.ExamScore;
 import com.classmanagement.mapper.ExamScoreMapper;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -17,7 +19,7 @@ public class ExamScoreService {
     
     private final ExamScoreMapper examScoreMapper;
     
-    public Page<ExamScore> getExamScoreList(int pageNum, int pageSize, String className, String examName, String studentName) {
+    public Page<ExamScoreDTO> getExamScoreList(int pageNum, int pageSize, String className, String examName, String studentName) {
         Page<ExamScore> page = new Page<>(pageNum, pageSize);
         LambdaQueryWrapper<ExamScore> wrapper = new LambdaQueryWrapper<>();
         
@@ -33,7 +35,59 @@ public class ExamScoreService {
         
         wrapper.orderByDesc(ExamScore::getExamDate);
         
-        return examScoreMapper.selectPage(page, wrapper);
+        Page<ExamScore> result = examScoreMapper.selectPage(page, wrapper);
+        
+        // 转换为DTO并计算成绩变化
+        Page<ExamScoreDTO> dtoPage = new Page<>(result.getCurrent(), result.getSize(), result.getTotal());
+        List<ExamScoreDTO> dtoList = result.getRecords().stream()
+                .map(ExamScoreDTO::fromEntity)
+                .collect(Collectors.toList());
+        
+        // 计算成绩变化
+        calculateScoreChanges(dtoList);
+        
+        dtoPage.setRecords(dtoList);
+        return dtoPage;
+    }
+    
+    private void calculateScoreChanges(List<ExamScoreDTO> currentScores) {
+        if (currentScores == null || currentScores.isEmpty()) {
+            return;
+        }
+        
+        // 获取所有考试名称并排序
+        LambdaQueryWrapper<ExamScore> examWrapper = new LambdaQueryWrapper<>();
+        examWrapper.select(ExamScore::getExamName)
+                   .groupBy(ExamScore::getExamName)
+                   .orderByAsc(ExamScore::getExamName);
+        List<ExamScore> examList = examScoreMapper.selectList(examWrapper);
+        List<String> examNames = examList.stream()
+                .map(ExamScore::getExamName)
+                .distinct()
+                .sorted()
+                .collect(Collectors.toList());
+        
+        // 为每条记录计算成绩变化
+        for (ExamScoreDTO score : currentScores) {
+            int currentExamIndex = examNames.indexOf(score.getExamName());
+            
+            // 如果不是第一次考试，查找上一次考试的成绩
+            if (currentExamIndex > 0) {
+                String previousExamName = examNames.get(currentExamIndex - 1);
+                
+                // 查询该学生上一次考试的成绩
+                LambdaQueryWrapper<ExamScore> prevWrapper = new LambdaQueryWrapper<>();
+                prevWrapper.eq(ExamScore::getStudentId, score.getStudentId())
+                           .eq(ExamScore::getExamName, previousExamName)
+                           .last("LIMIT 1");
+                ExamScore prevScore = examScoreMapper.selectOne(prevWrapper);
+                
+                if (prevScore != null) {
+                    BigDecimal change = score.getTotalScore().subtract(prevScore.getTotalScore());
+                    score.setScoreChange(change);
+                }
+            }
+        }
     }
     
     public ExamScore addExamScore(ExamScore examScore) {
@@ -141,7 +195,8 @@ public class ExamScoreService {
     public List<ExamScore> getStudentScores(Long studentId) {
         LambdaQueryWrapper<ExamScore> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(ExamScore::getStudentId, studentId)
-               .orderByDesc(ExamScore::getExamDate);
+               .orderByDesc(ExamScore::getExamDate)
+               .orderByDesc(ExamScore::getId);
         return examScoreMapper.selectList(wrapper);
     }
 }

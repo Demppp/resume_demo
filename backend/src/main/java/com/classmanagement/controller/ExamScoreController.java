@@ -1,6 +1,7 @@
 package com.classmanagement.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.classmanagement.dto.ExamScoreDTO;
 import com.classmanagement.dto.Result;
 import com.classmanagement.entity.ExamScore;
 import com.classmanagement.service.ExamScoreService;
@@ -17,13 +18,13 @@ public class ExamScoreController {
     private final ExamScoreService examScoreService;
     
     @GetMapping("/list")
-    public Result<Page<ExamScore>> getExamScoreList(
+    public Result<Page<ExamScoreDTO>> getExamScoreList(
             @RequestParam(defaultValue = "1") int pageNum,
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(required = false) String className,
             @RequestParam(required = false) String examName,
             @RequestParam(required = false) String studentName) {
-        Page<ExamScore> page = examScoreService.getExamScoreList(pageNum, pageSize, className, examName, studentName);
+        Page<ExamScoreDTO> page = examScoreService.getExamScoreList(pageNum, pageSize, className, examName, studentName);
         return Result.success(page);
     }
     

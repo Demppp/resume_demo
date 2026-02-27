@@ -22,6 +22,17 @@ public class ExamScore {
     private BigDecimal mathScore;
     private BigDecimal englishScore;
     private BigDecimal comprehensiveScore;
+    
+    // 理科：物理、化学、生物
+    private BigDecimal physicsScore;
+    private BigDecimal chemistryScore;
+    private BigDecimal biologyScore;
+    
+    // 文科：政治、历史、地理
+    private BigDecimal politicsScore;
+    private BigDecimal historyScore;
+    private BigDecimal geographyScore;
+    
     private BigDecimal totalScore;
     private Integer classRank;
     private Integer gradeRank;
