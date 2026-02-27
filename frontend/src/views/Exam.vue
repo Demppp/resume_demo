@@ -16,7 +16,7 @@
         </el-card>
       </el-col>
       <el-col :span="6">
-        <el-card shadow="hover" class="stat-card">
+        <el-card shadow="hover" class="stat-card stat-card-clickable" :class="{ 'stat-card-active': activeStatFilter === 'excellent' }" @click="toggleStatFilter('excellent')">
           <div class="stat-content">
             <div class="stat-icon" style="background: linear-gradient(135deg, #52c41a 0%, #389e0d 100%);">
               <el-icon :size="28"><Trophy /></el-icon>
@@ -42,7 +42,7 @@
         </el-card>
       </el-col>
       <el-col :span="6">
-        <el-card shadow="hover" class="stat-card">
+        <el-card shadow="hover" class="stat-card stat-card-clickable" :class="{ 'stat-card-active': activeStatFilter === 'needAttention' }" @click="toggleStatFilter('needAttention')">
           <div class="stat-content">
             <div class="stat-icon" style="background: linear-gradient(135deg, #f5222d 0%, #cf1322 100%);">
               <el-icon :size="28"><Warning /></el-icon>
@@ -93,6 +93,13 @@
               <el-option label="班级前3名" value="classTop3" />
               <el-option label="班级后5名" value="classBottom5" />
             </el-select>
+          </el-form-item>
+          <el-form-item label="分数范围">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <el-input-number v-model="searchForm.minScore" :min="0" :max="750" :controls="false" placeholder="最低分" style="width: 100px;" />
+              <span style="color: #999;">~</span>
+              <el-input-number v-model="searchForm.maxScore" :min="0" :max="750" :controls="false" placeholder="最高分" style="width: 100px;" />
+            </div>
           </el-form-item>
           <el-form-item>
             <el-button type="primary" @click="handleSearch">查询</el-button>
@@ -201,11 +208,13 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="predictedUniversity" label="预测大学" min-width="200">
+        <el-table-column prop="predictedUniversity" label="预测大学" min-width="200" show-overflow-tooltip>
           <template #default="{ row }">
-            <el-tag :type="getUniversityType(row.predictedUniversity)" effect="plain">
-              {{ row.predictedUniversity }}
-            </el-tag>
+            <el-tooltip :content="row.predictedUniversity" placement="top" :show-after="300">
+              <el-tag :type="getUniversityType(row.predictedUniversity)" effect="plain" style="max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                {{ row.predictedUniversity }}
+              </el-tag>
+            </el-tooltip>
           </template>
         </el-table-column>
         <el-table-column label="操作" width="180" fixed="right" align="center">
@@ -323,7 +332,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { getExamScoreList, addExamScore, updateExamScore, deleteExamScore } from '@/api/exam'
+import { getExamScoreList, addExamScore, updateExamScore, deleteExamScore, getExamStats } from '@/api/exam'
 import { useRoute } from 'vue-router'
 import { CaretTop, CaretBottom } from '@element-plus/icons-vue'
 
@@ -334,6 +343,7 @@ const dialogVisible = ref(false)
 const dialogTitle = ref('录入成绩')
 const focusFilter = ref('')
 const allData = ref([]) // 存储所有数据用于筛选
+const activeStatFilter = ref('') // 当前激活的统计卡片过滤器
 
 const stats = reactive({
   totalStudents: 0,
@@ -345,7 +355,9 @@ const stats = reactive({
 const searchForm = reactive({
   studentName: '',
   className: '',
-  examName: ''
+  examName: '',
+  minScore: undefined,
+  maxScore: undefined
 })
 
 const pagination = reactive({
@@ -402,12 +414,30 @@ const loadData = async () => {
       pageSize: pagination.pageSize,
       ...searchForm
     }
-    const res = await getExamScoreList(params)
-    allData.value = res.data.records
-    pagination.total = res.data.total
+    // 清理 undefined 值
+    Object.keys(params).forEach(key => {
+      if (params[key] === undefined || params[key] === '') {
+        delete params[key]
+      }
+    })
     
-    // 计算统计数据（基于当前筛选条件的总数）
-    calculateStatsFromTotal()
+    const [listRes, statsRes] = await Promise.all([
+      getExamScoreList(params),
+      getExamStats({
+        studentName: searchForm.studentName || undefined,
+        className: searchForm.className || undefined,
+        examName: searchForm.examName || undefined
+      })
+    ])
+    
+    allData.value = listRes.data.records
+    pagination.total = listRes.data.total
+    
+    // 使用后端返回的精确统计数据
+    stats.totalStudents = statsRes.data.totalStudents
+    stats.excellentCount = statsRes.data.excellentCount
+    stats.needAttentionCount = statsRes.data.needAttentionCount
+    stats.averageScore = statsRes.data.averageScore
     
     // 应用重点关注筛选
     applyFocusFilter()
@@ -417,24 +447,25 @@ const loadData = async () => {
   }
 }
 
-// 基于总数计算统计（避免加载所有数据）
-const calculateStatsFromTotal = () => {
-  // 使用当前页数据进行估算
-  const currentData = allData.value
-  if (currentData.length === 0) {
-    stats.totalStudents = 0
-    stats.excellentCount = 0
-    stats.averageScore = 0
-    stats.needAttentionCount = 0
-    return
+// 点击统计卡片切换过滤
+const toggleStatFilter = (filterType) => {
+  if (activeStatFilter.value === filterType) {
+    // 再次点击取消筛选
+    activeStatFilter.value = ''
+    searchForm.minScore = undefined
+    searchForm.maxScore = undefined
+  } else {
+    activeStatFilter.value = filterType
+    if (filterType === 'excellent') {
+      searchForm.minScore = 600
+      searchForm.maxScore = undefined
+    } else if (filterType === 'needAttention') {
+      searchForm.minScore = undefined
+      searchForm.maxScore = 499
+    }
   }
-  
-  stats.totalStudents = pagination.total
-  stats.excellentCount = currentData.filter(item => item.totalScore >= 600).length
-  stats.needAttentionCount = currentData.filter(item => item.totalScore < 500).length
-  
-  const totalScore = currentData.reduce((sum, item) => sum + parseFloat(item.totalScore), 0)
-  stats.averageScore = currentData.length > 0 ? (totalScore / currentData.length).toFixed(1) : 0
+  pagination.pageNum = 1
+  loadData()
 }
 
 const applyFocusFilter = () => {
@@ -475,7 +506,10 @@ const handleReset = () => {
   searchForm.studentName = ''
   searchForm.className = ''
   searchForm.examName = ''
+  searchForm.minScore = undefined
+  searchForm.maxScore = undefined
   focusFilter.value = ''
+  activeStatFilter.value = ''
   handleSearch()
 }
 
@@ -553,6 +587,18 @@ onMounted(() => {
   if (route.query.studentName) {
     searchForm.studentName = route.query.studentName
   }
+  if (route.query.minScore) {
+    searchForm.minScore = Number(route.query.minScore)
+    if (searchForm.minScore === 600) {
+      activeStatFilter.value = 'excellent'
+    }
+  }
+  if (route.query.maxScore) {
+    searchForm.maxScore = Number(route.query.maxScore)
+    if (searchForm.maxScore === 499) {
+      activeStatFilter.value = 'needAttention'
+    }
+  }
   
   loadData()
   
@@ -603,6 +649,16 @@ onMounted(() => {
 .stat-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+}
+
+.stat-card-clickable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.stat-card-active {
+  border: 2px solid #409eff !important;
+  box-shadow: 0 4px 16px rgba(64, 158, 255, 0.25) !important;
 }
 
 .stat-content {

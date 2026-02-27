@@ -13,6 +13,9 @@
 
       <div class="search-bar">
         <el-form :inline="true">
+          <el-form-item label="学生姓名">
+            <el-input v-model="searchForm.studentName" placeholder="请输入学生姓名" clearable style="width: 150px;" />
+          </el-form-item>
           <el-form-item label="班级">
             <el-select v-model="searchForm.className" placeholder="请选择班级" clearable>
               <el-option label="一班" value="一班" />
@@ -148,6 +151,9 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getAttendanceList, addAttendance, updateAttendance, deleteAttendance } from '@/api/attendance'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
 
 const tableData = ref([])
 const dialogVisible = ref(false)
@@ -155,6 +161,7 @@ const dialogTitle = ref('添加考勤记录')
 const dateRange = ref([])
 
 const searchForm = reactive({
+  studentName: '',
   className: '',
   startDate: '',
   endDate: ''
@@ -191,6 +198,7 @@ const loadData = async () => {
     const params = {
       pageNum: pagination.pageNum,
       pageSize: pagination.pageSize,
+      studentName: searchForm.studentName,
       className: searchForm.className,
       startDate: searchForm.startDate,
       endDate: searchForm.endDate
@@ -216,6 +224,7 @@ const handleSearch = () => {
 }
 
 const handleReset = () => {
+  searchForm.studentName = ''
   searchForm.className = ''
   dateRange.value = []
   searchForm.startDate = ''
@@ -283,6 +292,13 @@ const resetForm = () => {
 }
 
 onMounted(() => {
+  // 从 URL 参数中获取筛选条件
+  if (route.query.studentName) {
+    searchForm.studentName = route.query.studentName
+  }
+  if (route.query.className) {
+    searchForm.className = route.query.className
+  }
   loadData()
 })
 </script>

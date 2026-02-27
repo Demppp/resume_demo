@@ -8,7 +8,9 @@ import com.classmanagement.service.ExamScoreService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/exam")
@@ -23,9 +25,22 @@ public class ExamScoreController {
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(required = false) String className,
             @RequestParam(required = false) String examName,
-            @RequestParam(required = false) String studentName) {
-        Page<ExamScoreDTO> page = examScoreService.getExamScoreList(pageNum, pageSize, className, examName, studentName);
+            @RequestParam(required = false) String studentName,
+            @RequestParam(required = false) BigDecimal minScore,
+            @RequestParam(required = false) BigDecimal maxScore) {
+        Page<ExamScoreDTO> page = examScoreService.getExamScoreList(pageNum, pageSize, className, examName, studentName, minScore, maxScore);
         return Result.success(page);
+    }
+    
+    @GetMapping("/stats")
+    public Result<Map<String, Object>> getExamStats(
+            @RequestParam(required = false) String className,
+            @RequestParam(required = false) String examName,
+            @RequestParam(required = false) String studentName,
+            @RequestParam(required = false) BigDecimal minScore,
+            @RequestParam(required = false) BigDecimal maxScore) {
+        Map<String, Object> stats = examScoreService.getExamStats(className, examName, studentName, minScore, maxScore);
+        return Result.success(stats);
     }
     
     @PostMapping("/add")

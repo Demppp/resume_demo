@@ -1,26 +1,28 @@
 <template>
   <div class="ai-robot-container">
-    <!-- AI机器人 -->
+    <!-- AI智能助手 -->
     <div 
       class="ai-robot" 
       :class="{ 'robot-talking': isTalking, 'robot-demo': isDemoMode }"
       @click="handleRobotClick"
     >
-      <div class="robot-body">
-        <div class="robot-antenna">
-          <div class="antenna-ball"></div>
+      <div class="ai-orb">
+        <!-- 外圈光环 -->
+        <div class="orb-ring"></div>
+        <!-- 主体 -->
+        <div class="orb-core">
+          <!-- 脑回路图标 -->
+          <svg class="brain-icon" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20 6C14 6 9 10 9 16c0 4 2 7 5 9v4c0 1 1 2 2 2h8c1 0 2-1 2-2v-4c3-2 5-5 5-9 0-6-5-10-11-10z" stroke="white" stroke-width="2" stroke-linecap="round" fill="none"/>
+            <path d="M15 21v4M20 21v6M25 21v4" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+            <circle cx="16" cy="15" r="1.5" fill="white" opacity="0.9"/>
+            <circle cx="24" cy="15" r="1.5" fill="white" opacity="0.9"/>
+            <circle cx="20" cy="12" r="1" fill="white" opacity="0.6"/>
+            <path d="M14 14c2-1 4 1 6 0s4 1 6 0" stroke="white" stroke-width="1" opacity="0.5" stroke-linecap="round"/>
+          </svg>
         </div>
-        <div class="robot-head">
-          <div class="robot-eyes">
-            <div class="eye left" :class="{ 'eye-blink': isBlinking }"></div>
-            <div class="eye right" :class="{ 'eye-blink': isBlinking }"></div>
-          </div>
-          <div class="robot-mouth" :class="{ 'mouth-smile': isTalking }"></div>
-        </div>
-        <div class="robot-arms">
-          <div class="arm left"></div>
-          <div class="arm right"></div>
-        </div>
+        <!-- AI标识 -->
+        <div class="ai-badge">AI</div>
       </div>
       
       <!-- 提示气泡 -->
@@ -247,8 +249,6 @@ onUnmounted(() => {
 }
 
 .ai-robot {
-  width: 80px;
-  height: 100px;
   cursor: pointer;
   position: relative;
   animation: float 3s ease-in-out infinite;
@@ -259,186 +259,155 @@ onUnmounted(() => {
   transform: scale(1.1);
 }
 
+.ai-robot:hover .orb-ring {
+  opacity: 1;
+  transform: scale(1.15);
+}
+
 .ai-robot.robot-demo {
-  animation: float 3s ease-in-out infinite, pulse 1s ease-in-out infinite;
+  animation: float 3s ease-in-out infinite, glow-pulse 1.5s ease-in-out infinite;
 }
 
 @keyframes float {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
 }
 
-@keyframes pulse {
-  0%, 100% {
-    box-shadow: 0 0 0 0 rgba(24, 144, 255, 0.7);
-  }
-  50% {
-    box-shadow: 0 0 0 20px rgba(24, 144, 255, 0);
-  }
+@keyframes glow-pulse {
+  0%, 100% { filter: drop-shadow(0 0 12px rgba(99, 102, 241, 0.4)); }
+  50% { filter: drop-shadow(0 0 28px rgba(99, 102, 241, 0.8)); }
 }
 
-.robot-body {
+/* ===== AI 光球主体 ===== */
+.ai-orb {
   position: relative;
+  width: 64px;
+  height: 64px;
 }
 
-.robot-antenna {
+.orb-ring {
   position: absolute;
-  top: -15px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 2px;
-  height: 15px;
-  background: #1890ff;
-}
-
-.antenna-ball {
-  position: absolute;
-  top: -6px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 8px;
-  height: 8px;
-  background: #ff4d4f;
+  inset: -6px;
   border-radius: 50%;
-  animation: blink 1s ease-in-out infinite;
-}
-
-@keyframes blink {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.3;
-  }
-}
-
-.robot-head {
-  width: 60px;
-  height: 60px;
-  background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
-  border-radius: 15px;
-  margin: 0 auto;
-  position: relative;
-  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
-}
-
-.robot-eyes {
-  display: flex;
-  justify-content: space-around;
-  padding: 15px 10px 0;
-}
-
-.eye {
-  width: 12px;
-  height: 12px;
-  background: white;
-  border-radius: 50%;
-  position: relative;
-  transition: all 0.2s;
-}
-
-.eye::after {
-  content: '';
-  position: absolute;
-  width: 6px;
-  height: 6px;
-  background: #262626;
-  border-radius: 50%;
-  top: 3px;
-  left: 3px;
-}
-
-.eye-blink {
-  height: 2px;
-}
-
-.robot-mouth {
-  position: absolute;
-  bottom: 12px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 20px;
-  height: 8px;
-  border: 2px solid white;
-  border-top: none;
-  border-radius: 0 0 10px 10px;
+  border: 2px solid rgba(129, 140, 248, 0.4);
+  animation: ring-rotate 6s linear infinite;
+  opacity: 0.7;
   transition: all 0.3s;
 }
 
-.mouth-smile {
-  width: 30px;
-  height: 12px;
+.orb-ring::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  background: #a5b4fc;
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(165, 180, 252, 0.8);
 }
 
-.robot-arms {
+@keyframes ring-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.orb-core {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 40%, #a78bfa 100%);
   display: flex;
-  justify-content: space-between;
-  margin-top: 5px;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    0 4px 20px rgba(99, 102, 241, 0.35),
+    0 0 40px rgba(139, 92, 246, 0.15),
+    inset 0 -3px 8px rgba(0, 0, 0, 0.15),
+    inset 0 2px 4px rgba(255, 255, 255, 0.2);
+  position: relative;
+  overflow: hidden;
 }
 
-.arm {
-  width: 15px;
-  height: 30px;
-  background: #1890ff;
-  border-radius: 8px;
-  animation: wave 2s ease-in-out infinite;
+.orb-core::before {
+  content: '';
+  position: absolute;
+  top: 6px;
+  left: 10px;
+  width: 20px;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  transform: rotate(-30deg);
 }
 
-.arm.left {
-  animation-delay: 0s;
+.brain-icon {
+  width: 32px;
+  height: 32px;
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15));
 }
 
-.arm.right {
-  animation-delay: 1s;
+.ai-badge {
+  position: absolute;
+  bottom: -2px;
+  right: -4px;
+  width: 22px;
+  height: 22px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  font-weight: 800;
+  color: white;
+  letter-spacing: -0.3px;
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.4);
+  border: 2px solid white;
 }
 
-@keyframes wave {
-  0%, 100% {
-    transform: rotate(0deg);
-  }
-  50% {
-    transform: rotate(20deg);
-  }
-}
-
+/* ===== 气泡 ===== */
 .speech-bubble {
   position: absolute;
-  bottom: 110px;
+  bottom: 78px;
   right: 0;
-  background: white;
-  padding: 10px 15px;
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  padding: 10px 16px;
+  border-radius: 14px;
+  box-shadow: 0 6px 24px rgba(99, 102, 241, 0.12);
   white-space: nowrap;
-  font-size: 14px;
-  color: #262626;
+  font-size: 13px;
+  color: #312e81;
+  font-weight: 500;
+  border: 1px solid rgba(99, 102, 241, 0.12);
 }
 
 .speech-bubble::after {
   content: '';
   position: absolute;
   bottom: -8px;
-  right: 20px;
+  right: 22px;
   width: 0;
   height: 0;
   border-left: 8px solid transparent;
   border-right: 8px solid transparent;
-  border-top: 8px solid white;
+  border-top: 8px solid rgba(255, 255, 255, 0.95);
 }
 
 .bubble-enter-active, .bubble-leave-active {
-  transition: all 0.3s;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .bubble-enter-from, .bubble-leave-to {
   opacity: 0;
-  transform: translateY(10px);
+  transform: translateY(10px) scale(0.9);
 }
 
+/* ===== 对话框列表样式 ===== */
 .ai-dialog-content ul {
   list-style: none;
 }
@@ -450,9 +419,8 @@ onUnmounted(() => {
 
 .ai-dialog-content ul li:before {
   content: "• ";
-  color: #1890ff;
+  color: #6366f1;
   font-weight: bold;
   margin-right: 5px;
 }
 </style>
-

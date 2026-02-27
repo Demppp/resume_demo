@@ -16,12 +16,15 @@ public class AttendanceService {
     
     private final AttendanceMapper attendanceMapper;
     
-    public Page<Attendance> getAttendanceList(int pageNum, int pageSize, String className, LocalDate startDate, LocalDate endDate) {
+    public Page<Attendance> getAttendanceList(int pageNum, int pageSize, String className, String studentName, LocalDate startDate, LocalDate endDate) {
         Page<Attendance> page = new Page<>(pageNum, pageSize);
         LambdaQueryWrapper<Attendance> wrapper = new LambdaQueryWrapper<>();
         
         if (className != null && !className.isEmpty()) {
             wrapper.eq(Attendance::getClassName, className);
+        }
+        if (studentName != null && !studentName.isEmpty()) {
+            wrapper.like(Attendance::getStudentName, studentName);
         }
         if (startDate != null) {
             wrapper.ge(Attendance::getAttendanceDate, startDate);

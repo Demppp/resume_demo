@@ -9,8 +9,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -19,10 +22,8 @@ public class ExamScoreService {
     
     private final ExamScoreMapper examScoreMapper;
     
-    public Page<ExamScoreDTO> getExamScoreList(int pageNum, int pageSize, String className, String examName, String studentName) {
-        Page<ExamScore> page = new Page<>(pageNum, pageSize);
+    private LambdaQueryWrapper<ExamScore> buildQueryWrapper(String className, String examName, String studentName, BigDecimal minScore, BigDecimal maxScore) {
         LambdaQueryWrapper<ExamScore> wrapper = new LambdaQueryWrapper<>();
-        
         if (className != null && !className.isEmpty()) {
             wrapper.eq(ExamScore::getClassName, className);
         }
@@ -32,7 +33,18 @@ public class ExamScoreService {
         if (studentName != null && !studentName.isEmpty()) {
             wrapper.like(ExamScore::getStudentName, studentName);
         }
-        
+        if (minScore != null) {
+            wrapper.ge(ExamScore::getTotalScore, minScore);
+        }
+        if (maxScore != null) {
+            wrapper.le(ExamScore::getTotalScore, maxScore);
+        }
+        return wrapper;
+    }
+    
+    public Page<ExamScoreDTO> getExamScoreList(int pageNum, int pageSize, String className, String examName, String studentName, BigDecimal minScore, BigDecimal maxScore) {
+        Page<ExamScore> page = new Page<>(pageNum, pageSize);
+        LambdaQueryWrapper<ExamScore> wrapper = buildQueryWrapper(className, examName, studentName, minScore, maxScore);
         wrapper.orderByDesc(ExamScore::getExamDate);
         
         Page<ExamScore> result = examScoreMapper.selectPage(page, wrapper);
@@ -48,6 +60,55 @@ public class ExamScoreService {
         
         dtoPage.setRecords(dtoList);
         return dtoPage;
+    }
+    
+    public Map<String, Object> getExamStats(String className, String examName, String studentName, BigDecimal minScore, BigDecimal maxScore) {
+        // 使用与列表相同筛选条件（不含分数范围），统计全量数据
+        LambdaQueryWrapper<ExamScore> wrapper = buildQueryWrapper(className, examName, studentName, null, null);
+        List<ExamScore> allRecords = examScoreMapper.selectList(wrapper);
+        
+        Map<String, Object> stats = new HashMap<>();
+        
+        // 按学生去重：统计不同学生数
+        long distinctStudents = allRecords.stream()
+                .map(ExamScore::getStudentId)
+                .distinct()
+                .count();
+        stats.put("totalStudents", distinctStudents);
+        
+        // 如果没筛选特定考试，取每个学生最新一次考试的成绩来判断
+        // 如果筛选了特定考试，每个学生只有一条记录，直接统计
+        Map<Long, ExamScore> latestScoreByStudent = new HashMap<>();
+        for (ExamScore record : allRecords) {
+            Long sid = record.getStudentId();
+            if (!latestScoreByStudent.containsKey(sid) || 
+                record.getExamDate().isAfter(latestScoreByStudent.get(sid).getExamDate())) {
+                latestScoreByStudent.put(sid, record);
+            }
+        }
+        
+        List<ExamScore> latestScores = new java.util.ArrayList<>(latestScoreByStudent.values());
+        
+        long excellentCount = latestScores.stream()
+                .filter(s -> s.getTotalScore() != null && s.getTotalScore().compareTo(new BigDecimal("600")) >= 0)
+                .count();
+        stats.put("excellentCount", excellentCount);
+        
+        long needAttentionCount = latestScores.stream()
+                .filter(s -> s.getTotalScore() != null && s.getTotalScore().compareTo(new BigDecimal("500")) < 0)
+                .count();
+        stats.put("needAttentionCount", needAttentionCount);
+        
+        BigDecimal avg = latestScores.stream()
+                .filter(s -> s.getTotalScore() != null)
+                .map(ExamScore::getTotalScore)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        if (!latestScores.isEmpty()) {
+            avg = avg.divide(new BigDecimal(latestScores.size()), 1, RoundingMode.HALF_UP);
+        }
+        stats.put("averageScore", avg);
+        
+        return stats;
     }
     
     private void calculateScoreChanges(List<ExamScoreDTO> currentScores) {

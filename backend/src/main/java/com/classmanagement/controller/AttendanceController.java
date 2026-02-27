@@ -23,9 +23,10 @@ public class AttendanceController {
             @RequestParam(defaultValue = "1") int pageNum,
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(required = false) String className,
+            @RequestParam(required = false) String studentName,
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate) {
-        Page<Attendance> page = attendanceService.getAttendanceList(pageNum, pageSize, className, startDate, endDate);
+        Page<Attendance> page = attendanceService.getAttendanceList(pageNum, pageSize, className, studentName, startDate, endDate);
         return Result.success(page);
     }
     

@@ -3,14 +3,14 @@
     <!-- 顶部统计卡片 -->
     <el-row :gutter="20" style="margin-bottom: 20px;">
       <el-col :span="6">
-        <el-card shadow="hover" class="stat-card">
+        <el-card shadow="hover" class="stat-card stat-card-link" @click="goToStudents">
           <div class="stat-content">
             <div class="stat-icon" style="background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);">
               <el-icon :size="32"><User /></el-icon>
             </div>
             <div class="stat-info">
               <div class="stat-value">{{ totalStats.studentCount }}</div>
-              <div class="stat-label">在校学生</div>
+              <div class="stat-label">在校学生 <el-icon :size="12" style="vertical-align: middle;"><Right /></el-icon></div>
             </div>
           </div>
         </el-card>
@@ -42,14 +42,14 @@
         </el-card>
       </el-col>
       <el-col :span="6">
-        <el-card shadow="hover" class="stat-card">
+        <el-card shadow="hover" class="stat-card stat-card-link" @click="goToExcellentStudents">
           <div class="stat-content">
             <div class="stat-icon" style="background: linear-gradient(135deg, #f5222d 0%, #cf1322 100%);">
               <el-icon :size="32"><Trophy /></el-icon>
             </div>
             <div class="stat-info">
               <div class="stat-value">{{ totalStats.excellentCount }}</div>
-              <div class="stat-label">优秀学生</div>
+              <div class="stat-label">优秀学生 <el-icon :size="12" style="vertical-align: middle;"><Right /></el-icon></div>
             </div>
           </div>
         </el-card>
@@ -320,6 +320,14 @@ const loadSubjectRankings = async () => {
   }
 }
 
+const goToStudents = () => {
+  router.push('/student')
+}
+
+const goToExcellentStudents = () => {
+  router.push('/exam?minScore=600')
+}
+
 const viewClassStudents = (row) => {
   router.push(`/student?className=${row.className}`)
 }
@@ -378,6 +386,14 @@ onMounted(() => {
 .stat-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+}
+
+.stat-card-link:hover {
+  box-shadow: 0 12px 24px rgba(24, 144, 255, 0.18);
+}
+
+.stat-card-link:active {
+  transform: translateY(-2px);
 }
 
 .stat-content {

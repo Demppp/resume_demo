@@ -1,6 +1,6 @@
 package com.classmanagement.controller;
 
-import com.classmanagement.common.Result;
+import com.classmanagement.dto.Result;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;

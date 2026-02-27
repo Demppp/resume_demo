@@ -16,6 +16,10 @@ export const deleteExamScore = (id) => {
   return request.delete(`/exam/delete/${id}`)
 }
 
+export const getExamStats = (params) => {
+  return request.get('/exam/stats', { params })
+}
+
 export const getStudentScores = (studentId) => {
   return request.get(`/exam/student/${studentId}`)
 }
