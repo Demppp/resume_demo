@@ -37,6 +37,7 @@ public class ExamScore {
     private Integer classRank;
     private Integer gradeRank;
     private String predictedUniversity;
+    private Integer scoreChange;  // 与上次考试的分数变化
     
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createdTime;

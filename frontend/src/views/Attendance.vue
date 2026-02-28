@@ -17,7 +17,7 @@
             <el-input v-model="searchForm.studentName" placeholder="请输入学生姓名" clearable style="width: 150px;" />
           </el-form-item>
           <el-form-item label="班级">
-            <el-select v-model="searchForm.className" placeholder="请选择班级" clearable>
+            <el-select v-model="searchForm.className" placeholder="请选择班级" clearable style="width: 120px;">
               <el-option label="一班" value="一班" />
               <el-option label="二班" value="二班" />
               <el-option label="三班" value="三班" />
@@ -103,7 +103,7 @@
           <el-input v-model="form.studentName" placeholder="请输入学生姓名" />
         </el-form-item>
         <el-form-item label="班级" required>
-          <el-select v-model="form.className" placeholder="请选择班级">
+          <el-select v-model="form.className" placeholder="请选择班级" style="width: 100%;">
             <el-option label="一班" value="一班" />
             <el-option label="二班" value="二班" />
             <el-option label="三班" value="三班" />
@@ -122,7 +122,7 @@
           />
         </el-form-item>
         <el-form-item label="考勤状态" required>
-          <el-select v-model="form.attendanceStatus" placeholder="请选择考勤状态">
+          <el-select v-model="form.attendanceStatus" placeholder="请选择考勤状态" style="width: 100%;">
             <el-option label="正常" value="正常" />
             <el-option label="迟到" value="迟到" />
             <el-option label="早退" value="早退" />
@@ -299,7 +299,13 @@ onMounted(() => {
   if (route.query.className) {
     searchForm.className = route.query.className
   }
-  loadData()
+  
+  // 如果有URL参数，自动触发搜索
+  if (route.query.studentName || route.query.className) {
+    handleSearch()
+  } else {
+    loadData()
+  }
 })
 </script>
 

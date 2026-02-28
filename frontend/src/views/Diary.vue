@@ -14,7 +14,7 @@
       <div class="search-bar">
         <el-form :inline="true">
           <el-form-item label="班级">
-            <el-select v-model="searchForm.className" placeholder="请选择班级" clearable>
+            <el-select v-model="searchForm.className" placeholder="请选择班级" clearable style="width: 120px;">
               <el-option label="一班" value="一班" />
               <el-option label="二班" value="二班" />
               <el-option label="三班" value="三班" />
@@ -102,7 +102,7 @@
     <el-dialog v-model="dialogVisible" :title="dialogTitle" width="700px">
       <el-form :model="form" label-width="100px">
         <el-form-item label="班级" required>
-          <el-select v-model="form.className" placeholder="请选择班级">
+          <el-select v-model="form.className" placeholder="请选择班级" style="width: 100%;">
             <el-option label="一班" value="一班" />
             <el-option label="二班" value="二班" />
             <el-option label="三班" value="三班" />
@@ -171,6 +171,9 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getDiaryList, addDiary, updateDiary, deleteDiary } from '@/api/diary'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
 
 const tableData = ref([])
 const dialogVisible = ref(false)
@@ -311,7 +314,17 @@ const resetForm = () => {
 }
 
 onMounted(() => {
-  loadData()
+  // 从URL参数中获取筛选条件
+  if (route.query.className) {
+    searchForm.className = route.query.className
+  }
+  
+  // 如果有URL参数，自动触发搜索
+  if (route.query.className) {
+    handleSearch()
+  } else {
+    loadData()
+  }
 })
 </script>
 

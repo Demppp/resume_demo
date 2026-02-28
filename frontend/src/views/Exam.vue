@@ -73,7 +73,7 @@
             <el-input v-model="searchForm.studentName" placeholder="请输入学生姓名" clearable style="width: 150px;" />
           </el-form-item>
           <el-form-item label="班级">
-            <el-select v-model="searchForm.className" placeholder="请选择班级" clearable>
+            <el-select v-model="searchForm.className" placeholder="请选择班级" clearable style="width: 120px;">
               <el-option label="一班" value="一班" />
               <el-option label="二班" value="二班" />
               <el-option label="三班" value="三班" />
@@ -86,7 +86,7 @@
             <el-input v-model="searchForm.examName" placeholder="请输入考试名称" clearable style="width: 150px;" />
           </el-form-item>
           <el-form-item label="重点关注">
-            <el-select v-model="focusFilter" placeholder="筛选学生" clearable @change="handleSearch">
+            <el-select v-model="focusFilter" placeholder="筛选学生" clearable @change="handleSearch" style="width: 140px;">
               <el-option label="全部学生" value="" />
               <el-option label="年级前10名" value="top10" />
               <el-option label="年级后20名" value="bottom20" />
@@ -255,7 +255,7 @@
           </el-col>
           <el-col :span="12">
             <el-form-item label="班级" required>
-              <el-select v-model="form.className" placeholder="请选择班级">
+              <el-select v-model="form.className" placeholder="请选择班级" style="width: 100%;">
                 <el-option label="一班" value="一班" />
                 <el-option label="二班" value="二班" />
                 <el-option label="三班" value="三班" />
@@ -270,7 +270,7 @@
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="科类" required>
-              <el-select v-model="form.classType" placeholder="请选择科类">
+              <el-select v-model="form.classType" placeholder="请选择科类" style="width: 100%;">
                 <el-option label="文科" value="文科" />
                 <el-option label="理科" value="理科" />
               </el-select>

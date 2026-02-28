@@ -35,11 +35,9 @@ public class ExamScoreDTO {
     private Integer classRank;
     private Integer gradeRank;
     private String predictedUniversity;
+    private Integer scoreChange;  // 与上次考试的分数变化
     private LocalDateTime createdTime;
     private LocalDateTime updatedTime;
-    
-    // 新增：成绩变化
-    private BigDecimal scoreChange;
     
     public static ExamScoreDTO fromEntity(ExamScore entity) {
         ExamScoreDTO dto = new ExamScoreDTO();
@@ -64,6 +62,7 @@ public class ExamScoreDTO {
         dto.setClassRank(entity.getClassRank());
         dto.setGradeRank(entity.getGradeRank());
         dto.setPredictedUniversity(entity.getPredictedUniversity());
+        dto.setScoreChange(entity.getScoreChange());
         dto.setCreatedTime(entity.getCreatedTime());
         dto.setUpdatedTime(entity.getUpdatedTime());
         return dto;
