@@ -145,7 +145,7 @@ public class ExamScoreService {
                 
                 if (prevScore != null) {
                     BigDecimal change = score.getTotalScore().subtract(prevScore.getTotalScore());
-                    score.setScoreChange(change);
+                    score.setScoreChange(change.intValue());
                 }
             }
         }
