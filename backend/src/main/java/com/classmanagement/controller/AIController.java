@@ -114,8 +114,8 @@ public class AIController {
     
     // 提取学生姓名
     private String extractStudentName(String query) {
-        String[] commonNames = {"张伟", "李娜", "王芳", "刘洋", "陈静", "杨帆", "赵敏", "黄强", "周杰", "吴磊",
-                "徐娟", "孙浩", "马超", "朱丽", "胡军", "郭敏", "林峰", "何洁", "高鹏", "梁静"};
+        String[] commonNames = {"张伟", "王芳", "李明", "赵静", "陈强", "刘丽", "杨勇", "黄艳", "周涛", "吴平",
+                "张三", "李四", "王五", "赵六", "钱七", "孙浩", "马超", "朱丽", "胡军", "郭敏"};
         
         for (String name : commonNames) {
             if (query.contains(name)) {
@@ -127,30 +127,32 @@ public class AIController {
     
     // 提取考试名称
     private String extractExamName(String query) {
-        if (query.contains("第一周") || query.contains("一周")) {
-            return "第一周周考";
-        } else if (query.contains("第二周") || query.contains("二周")) {
-            return "第二周周考";
-        } else if (query.contains("第三周") || query.contains("三周")) {
+        if (query.contains("第一次月考")) {
+            return "第一次月考";
+        } else if (query.contains("第二次月考")) {
+            return "第二次月考";
+        } else if (query.contains("第三周周考")) {
             return "第三周周考";
+        } else if (query.contains("第一周") || query.contains("一周")) {
+            return "第一周周考";
         }
         return null;
     }
     
     // 提取班级
     private String extractClassName(String query) {
-        if (query.contains("一班") || query.contains("1班")) {
-            return "一班";
-        } else if (query.contains("二班") || query.contains("2班")) {
-            return "二班";
-        } else if (query.contains("三班") || query.contains("3班")) {
-            return "三班";
-        } else if (query.contains("四班") || query.contains("4班")) {
-            return "四班";
-        } else if (query.contains("五班") || query.contains("5班")) {
-            return "五班";
-        } else if (query.contains("六班") || query.contains("6班")) {
-            return "六班";
+        if (query.contains("高三1班") || query.contains("一班") || query.contains("1班")) {
+            return "高三1班";
+        } else if (query.contains("高三2班") || query.contains("二班") || query.contains("2班")) {
+            return "高三2班";
+        } else if (query.contains("高三3班") || query.contains("三班") || query.contains("3班")) {
+            return "高三3班";
+        } else if (query.contains("高三4班") || query.contains("四班") || query.contains("4班")) {
+            return "高三4班";
+        } else if (query.contains("高三5班") || query.contains("五班") || query.contains("5班")) {
+            return "高三5班";
+        } else if (query.contains("高三6班") || query.contains("六班") || query.contains("6班")) {
+            return "高三6班";
         }
         return null;
     }

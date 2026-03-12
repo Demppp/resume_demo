@@ -2,7 +2,7 @@
   <div class="exam-container">
     <!-- 统计卡片 -->
     <el-row :gutter="20" style="margin-bottom: 20px;">
-      <el-col :span="6">
+      <el-col :xs="12" :sm="12" :md="6">
         <el-card shadow="hover" class="stat-card">
           <div class="stat-content">
             <div class="stat-icon" style="background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);">
@@ -15,7 +15,7 @@
           </div>
         </el-card>
       </el-col>
-      <el-col :span="6">
+      <el-col :xs="12" :sm="12" :md="6">
         <el-card shadow="hover" class="stat-card stat-card-clickable" :class="{ 'stat-card-active': activeStatFilter === 'excellent' }" @click="toggleStatFilter('excellent')">
           <div class="stat-content">
             <div class="stat-icon" style="background: linear-gradient(135deg, #52c41a 0%, #389e0d 100%);">
@@ -28,7 +28,7 @@
           </div>
         </el-card>
       </el-col>
-      <el-col :span="6">
+      <el-col :xs="12" :sm="12" :md="6">
         <el-card shadow="hover" class="stat-card">
           <div class="stat-content">
             <div class="stat-icon" style="background: linear-gradient(135deg, #faad14 0%, #d48806 100%);">
@@ -41,7 +41,7 @@
           </div>
         </el-card>
       </el-col>
-      <el-col :span="6">
+      <el-col :xs="12" :sm="12" :md="6">
         <el-card shadow="hover" class="stat-card stat-card-clickable" :class="{ 'stat-card-active': activeStatFilter === 'needAttention' }" @click="toggleStatFilter('needAttention')">
           <div class="stat-content">
             <div class="stat-icon" style="background: linear-gradient(135deg, #f5222d 0%, #cf1322 100%);">
@@ -60,10 +60,20 @@
       <template #header>
         <div class="card-header">
           <span class="title">成绩管理</span>
-          <el-button type="primary" @click="showAddDialog">
-            <el-icon><Plus /></el-icon>
-            录入成绩
-          </el-button>
+          <div class="header-actions">
+            <el-button type="warning" @click="handleExportExcel">
+              <el-icon><Download /></el-icon>
+              导出 Excel
+            </el-button>
+            <el-button type="info" @click="handlePrintReport">
+              <el-icon><Printer /></el-icon>
+              打印成绩单
+            </el-button>
+            <el-button type="primary" @click="showAddDialog">
+              <el-icon><Plus /></el-icon>
+              录入成绩
+            </el-button>
+          </div>
         </div>
       </template>
 
@@ -333,10 +343,15 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getExamScoreList, addExamScore, updateExamScore, deleteExamScore, getExamStats } from '@/api/exam'
-import { useRoute } from 'vue-router'
-import { CaretTop, CaretBottom } from '@element-plus/icons-vue'
+import { useRoute, useRouter } from 'vue-router'
+import { 
+  TrendCharts, Trophy, DataLine, Warning, 
+  Download, Printer, Plus, Edit, Delete, 
+  CaretTop, CaretBottom 
+} from '@element-plus/icons-vue'
 
 const route = useRoute()
+const router = useRouter()
 
 const tableData = ref([])
 const dialogVisible = ref(false)
@@ -576,6 +591,17 @@ const resetForm = () => {
   form.comprehensiveScore = 0
 }
 
+const handleExportExcel = () => {
+  const params = new URLSearchParams()
+  if (searchForm.className) params.append('className', searchForm.className)
+  if (searchForm.examName) params.append('examName', searchForm.examName)
+  window.open(`/api/export/scores?${params.toString()}`, '_blank')
+}
+
+const handlePrintReport = () => {
+  router.push('/print-report')
+}
+
 onMounted(() => {
   // 从URL参数中获取筛选条件
   if (route.query.examName) {
@@ -626,7 +652,12 @@ onMounted(() => {
 .title {
   font-size: 18px;
   font-weight: 600;
-  color: #2c3e50;
+  color: var(--text-primary, #2c3e50);
+}
+
+.header-actions {
+  display: flex;
+  gap: 10px;
 }
 
 .search-bar {
@@ -684,14 +715,14 @@ onMounted(() => {
 .stat-value {
   font-size: 26px;
   font-weight: 700;
-  color: #262626;
+  color: var(--text-primary, #262626);
   line-height: 1;
   margin-bottom: 6px;
 }
 
 .stat-label {
   font-size: 13px;
-  color: #8c8c8c;
+  color: var(--text-secondary, #8c8c8c);
 }
 
 :deep(.top-student-row) {
@@ -709,17 +740,17 @@ onMounted(() => {
 :deep(.el-card) {
   border-radius: 8px;
   border: none;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--shadow-card, 0 2px 8px rgba(0, 0, 0, 0.06));
 }
 
 :deep(.el-card__header) {
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--border-lighter, #f0f0f0);
   padding: 16px 20px;
 }
 
 :deep(.el-table__header th) {
-  background: #fafafa !important;
-  color: #262626;
+  background: var(--bg-table-header, #fafafa) !important;
+  color: var(--text-primary, #262626);
   font-weight: 600;
 }
 </style>

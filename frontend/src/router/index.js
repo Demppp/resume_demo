@@ -21,6 +21,11 @@ const routes = [
         component: () => import('@/views/Student.vue')
       },
       {
+        path: '/student-profile/:id',
+        name: 'StudentProfile',
+        component: () => import('@/views/StudentProfile.vue')
+      },
+      {
         path: '/attendance',
         name: 'Attendance',
         component: () => import('@/views/Attendance.vue')
@@ -44,8 +49,28 @@ const routes = [
         path: '/analytics',
         name: 'Analytics',
         component: () => import('@/views/Analytics.vue')
+      },
+      {
+        path: '/operation-log',
+        name: 'OperationLog',
+        component: () => import('@/views/OperationLog.vue')
+      },
+      {
+        path: '/semester',
+        name: 'Semester',
+        component: () => import('@/views/Semester.vue')
+      },
+      {
+        path: '/print-report',
+        name: 'PrintReport',
+        component: () => import('@/views/PrintReport.vue')
       }
     ]
+  },
+  {
+    path: '/data-screen',
+    name: 'DataScreen',
+    component: () => import('@/views/DataScreen.vue')
   }
 ]
 
@@ -55,4 +80,3 @@ const router = createRouter({
 })
 
 export default router
-

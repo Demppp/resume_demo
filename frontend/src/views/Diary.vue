@@ -172,6 +172,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getDiaryList, addDiary, updateDiary, deleteDiary } from '@/api/diary'
 import { useRoute } from 'vue-router'
+import { Plus, MagicStick, View, Edit, Delete } from '@element-plus/icons-vue'
 
 const route = useRoute()
 

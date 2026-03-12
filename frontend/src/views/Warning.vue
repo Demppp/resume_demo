@@ -70,7 +70,7 @@
       <!-- 预警列表 -->
       <el-tabs v-model="activeTab" type="card">
         <el-tab-pane label="全部预警" name="all">
-          <el-table :data="paginatedWarnings" stripe style="width: 100%">
+          <el-table :data="allWarnings" stripe style="width: 100%">
             <el-table-column prop="studentName" label="学生姓名" width="100" align="center">
               <template #default="{ row }">
                 <span style="font-weight: 600;">{{ row.studentName }}</span>
@@ -112,9 +112,11 @@
             <el-pagination
               v-model:current-page="pagination.pageNum"
               v-model:page-size="pagination.pageSize"
-              :total="allWarnings.length"
+              :total="pagination.total"
               :page-sizes="[10, 20, 50, 100]"
               layout="total, sizes, prev, pager, next, jumper"
+              @size-change="loadWarnings"
+              @current-change="loadWarnings"
             />
           </div>
         </el-tab-pane>
@@ -218,14 +220,15 @@ import { ref, reactive, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Warning, TrendCharts, Calendar, DataLine } from '@element-plus/icons-vue'
-import axios from 'axios'
+import { getWarningList } from '@/api/warning'
 
 const router = useRouter()
 const activeTab = ref('all')
 
 const pagination = reactive({
   pageNum: 1,
-  pageSize: 10
+  pageSize: 10,
+  total: 0
 })
 
 const warningStats = reactive({
@@ -240,22 +243,20 @@ const scoreWarnings = computed(() => allWarnings.value.filter(w => w.warningType
 const attendanceWarnings = computed(() => allWarnings.value.filter(w => w.warningType === '考勤异常'))
 const lowScoreWarnings = computed(() => allWarnings.value.filter(w => w.warningType === '成绩偏低'))
 
-const paginatedWarnings = computed(() => {
-  const start = (pagination.pageNum - 1) * pagination.pageSize
-  const end = start + pagination.pageSize
-  return allWarnings.value.slice(start, end)
-})
+// 移除客户端分页，数据已由后端分页返回
 
 const loadWarnings = async () => {
   try {
-    const res = await axios.get('/api/warning/list')
-    allWarnings.value = res.data.data
+    const res = await getWarningList({
+      pageNum: pagination.pageNum,
+      pageSize: pagination.pageSize
+    })
+    // 后端返回的是 Page 对象，数据在 records 中
+    allWarnings.value = res.data.records
+    pagination.total = res.data.total
     
-    // 统计各类预警数量
-    warningStats.totalWarnings = allWarnings.value.length
-    warningStats.scoreDecline = scoreWarnings.value.length
-    warningStats.attendanceIssue = attendanceWarnings.value.length
-    warningStats.lowScore = lowScoreWarnings.value.length
+    // 基础统计数据
+    warningStats.totalWarnings = pagination.total
   } catch (error) {
     ElMessage.error('加载预警数据失败')
   }

@@ -5,7 +5,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://111.228.5.192:3306/resume_demo?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
     username: root
-    password: 123456
+    password: p0@wls12ss
   
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
@@ -32,7 +32,7 @@ server:
 # LangChain配置 - 通义千问
 langchain:
   qwen:
-    api-key: sk-cbc7273aedbe42d39d9410f0e3db6c9c
+    api-key: ${QWEN_API_KEY:sk-cbc7273aedbe42d39d9410f0e3db6c9c}
     model-name: qwen-turbo
     base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
 

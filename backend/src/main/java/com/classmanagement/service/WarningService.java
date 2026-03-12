@@ -1,6 +1,6 @@
 package com.classmanagement.service;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.classmanagement.dto.WarningDTO;
 import com.classmanagement.entity.Attendance;
 import com.classmanagement.entity.ExamScore;
@@ -27,6 +27,24 @@ public class WarningService {
 
     @Autowired
     private StudentMapper studentMapper;
+
+    public Page<WarningDTO> getWarningPage(int pageNum, int pageSize) {
+        List<WarningDTO> allWarnings = getWarningList();
+        
+        Page<WarningDTO> page = new Page<>(pageNum, pageSize);
+        page.setTotal(allWarnings.size());
+        
+        int start = (pageNum - 1) * pageSize;
+        int end = Math.min(start + pageSize, allWarnings.size());
+        
+        if (start < allWarnings.size()) {
+            page.setRecords(allWarnings.subList(start, end));
+        } else {
+            page.setRecords(new ArrayList<>());
+        }
+        
+        return page;
+    }
 
     public List<WarningDTO> getWarningList() {
         List<WarningDTO> warnings = new ArrayList<>();

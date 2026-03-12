@@ -2,7 +2,7 @@
   <div class="dashboard-container">
     <!-- 顶部统计卡片 -->
     <el-row :gutter="20" style="margin-bottom: 20px;">
-      <el-col :span="6">
+      <el-col :xs="12" :sm="12" :md="6">
         <el-card shadow="hover" class="stat-card stat-card-link" @click="goToStudents">
           <div class="stat-content">
             <div class="stat-icon" style="background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);">
@@ -15,7 +15,7 @@
           </div>
         </el-card>
       </el-col>
-      <el-col :span="6">
+      <el-col :xs="12" :sm="12" :md="6">
         <el-card shadow="hover" class="stat-card">
           <div class="stat-content">
             <div class="stat-icon" style="background: linear-gradient(135deg, #52c41a 0%, #389e0d 100%);">
@@ -28,7 +28,7 @@
           </div>
         </el-card>
       </el-col>
-      <el-col :span="6">
+      <el-col :xs="12" :sm="12" :md="6">
         <el-card shadow="hover" class="stat-card">
           <div class="stat-content">
             <div class="stat-icon" style="background: linear-gradient(135deg, #faad14 0%, #d48806 100%);">
@@ -41,7 +41,7 @@
           </div>
         </el-card>
       </el-col>
-      <el-col :span="6">
+      <el-col :xs="12" :sm="12" :md="6">
         <el-card shadow="hover" class="stat-card stat-card-link" @click="goToExcellentStudents">
           <div class="stat-content">
             <div class="stat-icon" style="background: linear-gradient(135deg, #f5222d 0%, #cf1322 100%);">
@@ -57,9 +57,9 @@
     </el-row>
 
     <!-- 主要内容区域 -->
-    <el-row :gutter="20">
+    <el-row :gutter="20" v-loading="loading">
       <!-- 左侧：班级排名 -->
-      <el-col :span="12">
+      <el-col :xs="24" :sm="24" :md="12">
         <el-card shadow="hover" class="module-card">
           <template #header>
             <div class="card-header">
@@ -111,7 +111,7 @@
       </el-col>
 
       <!-- 右侧：三好学生 -->
-      <el-col :span="12">
+      <el-col :xs="24" :sm="24" :md="12">
         <el-card shadow="hover" class="module-card">
           <template #header>
             <div class="card-header">
@@ -150,7 +150,7 @@
             </el-table-column>
             <el-table-column label="操作" align="center">
               <template #default="{ row }">
-                <el-button type="success" size="small" link @click="viewStudentDetail(row)">
+                <el-button type="success" size="small" link @click="viewStudentProfile(row)">
                   查看详情
                 </el-button>
               </template>
@@ -163,7 +163,7 @@
     <!-- 第二行 -->
     <el-row :gutter="20" style="margin-top: 20px;">
       <!-- 单科成绩排名 -->
-      <el-col :span="12">
+      <el-col :xs="24" :sm="24" :md="12">
         <el-card shadow="hover" class="module-card">
           <template #header>
             <div class="card-header">
@@ -215,7 +215,7 @@
       </el-col>
 
       <!-- 考勤预警 -->
-      <el-col :span="12">
+      <el-col :xs="24" :sm="24" :md="12">
         <el-card shadow="hover" class="module-card">
           <template #header>
             <div class="card-header">
@@ -271,6 +271,8 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import axios from 'axios'
 
+const loading = ref(false)
+
 const router = useRouter()
 
 const totalStats = reactive({
@@ -287,6 +289,7 @@ const attendanceWarnings = ref([])
 const selectedSubject = ref('chinese')
 
 const loadDashboardData = async () => {
+  loading.value = true
   try {
     // 加载统计数据
     const statsRes = await axios.get('/api/dashboard/stats')
@@ -308,6 +311,8 @@ const loadDashboardData = async () => {
     loadSubjectRankings()
   } catch (error) {
     ElMessage.error('加载数据失败')
+  } finally {
+    loading.value = false
   }
 }
 
@@ -334,6 +339,14 @@ const viewClassStudents = (row) => {
 
 const viewStudentDetail = (row) => {
   router.push(`/exam?studentName=${row.studentName}`)
+}
+
+const viewStudentProfile = (row) => {
+  if (row.studentId || row.id) {
+    router.push(`/student-profile/${row.studentId || row.id}`)
+  } else {
+    router.push(`/exam?studentName=${row.studentName}`)
+  }
 }
 
 const viewAttendance = (row) => {
@@ -421,14 +434,14 @@ onMounted(() => {
 .stat-value {
   font-size: 30px;
   font-weight: 700;
-  color: #262626;
+  color: var(--text-primary);
   line-height: 1;
   margin-bottom: 8px;
 }
 
 .stat-label {
   font-size: 14px;
-  color: #8c8c8c;
+  color: var(--text-secondary);
   font-weight: 400;
 }
 
@@ -436,7 +449,7 @@ onMounted(() => {
   border-radius: 8px;
   min-height: 420px;
   border: none;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--shadow-card);
   transition: all 0.3s;
 }
 
@@ -453,7 +466,7 @@ onMounted(() => {
 .card-title {
   font-size: 16px;
   font-weight: 600;
-  color: #262626;
+  color: var(--text-primary);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -464,8 +477,8 @@ onMounted(() => {
 }
 
 :deep(.el-table__header th) {
-  background: #fafafa !important;
-  color: #262626;
+  background: var(--bg-table-header) !important;
+  color: var(--text-primary);
   font-weight: 600;
 }
 
@@ -475,11 +488,11 @@ onMounted(() => {
 }
 
 :deep(.el-table__row:hover) {
-  background-color: #f5f5f5 !important;
+  background-color: var(--bg-hover) !important;
 }
 
 :deep(.el-card__header) {
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--border-lighter);
   padding: 16px 20px;
 }
 

@@ -66,7 +66,7 @@
             <template #header>
               <span class="chart-title">⚠️ 风险学生名单</span>
             </template>
-            <el-table :data="riskStudents" stripe style="width: 100%; height: 350px;" max-height="350">
+            <el-table :data="paginatedRiskStudents" stripe style="width: 100%; height: 350px;" max-height="350">
               <el-table-column type="index" label="序号" width="60" align="center" />
               <el-table-column prop="studentName" label="姓名" width="100" align="center">
                 <template #default="{ row }">
@@ -86,14 +86,17 @@
                 </template>
               </el-table-column>
               <el-table-column prop="riskReason" label="风险原因" min-width="200" />
-              <el-table-column label="操作" width="120" align="center">
-                <template #default="{ row }">
-                  <el-button type="primary" size="small" link @click="viewStudentDetail(row)">
-                    查看详情
-                  </el-button>
-                </template>
-              </el-table-column>
             </el-table>
+            <div class="pagination-container" style="margin-top: 10px; display: flex; justify-content: flex-end;">
+              <el-pagination
+                small
+                background
+                layout="prev, pager, next"
+                :total="riskStudents.length"
+                :page-size="riskPagination.pageSize"
+                v-model:current-page="riskPagination.pageNum"
+              />
+            </div>
           </el-card>
         </el-col>
       </el-row>
@@ -102,19 +105,29 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick } from 'vue'
+import { ref, reactive, onMounted, nextTick, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { DataAnalysis } from '@element-plus/icons-vue'
-import axios from 'axios'
+import request from '@/api/request'
 import * as echarts from 'echarts'
 
 const router = useRouter()
-const selectedExam = ref('第一周周考')
+const selectedExam = ref('')
 const selectedStudent = ref('')
-const examList = ref(['第一周周考', '第二周周考'])
+const examList = ref([])
 const studentList = ref([])
 const riskStudents = ref([])
+const riskPagination = reactive({
+  pageNum: 1,
+  pageSize: 10
+})
+
+const paginatedRiskStudents = computed(() => {
+  const start = (riskPagination.pageNum - 1) * riskPagination.pageSize
+  const end = start + riskPagination.pageSize
+  return riskStudents.value.slice(start, end)
+})
 
 const trendChart = ref(null)
 const distributionChart = ref(null)
@@ -124,14 +137,27 @@ let trendChartInstance = null
 let distributionChartInstance = null
 let rankingChartInstance = null
 
+const loadExams = async () => {
+  try {
+    const res = await request.get('/analytics/exams')
+    examList.value = res.data
+    if (examList.value.length > 0) {
+      selectedExam.value = examList.value[0]
+      loadAnalytics()
+    }
+  } catch (error) {
+    ElMessage.error('加载考试列表失败')
+  }
+}
+
 // 加载分析数据
 const loadAnalytics = async () => {
   try {
-    const res = await axios.get('/api/analytics/data', {
+    const res = await request.get('/analytics/data', {
       params: { examName: selectedExam.value }
     })
     
-    const data = res.data.data
+    const data = res.data
     
     // 渲染图表
     renderTrendChart(data.trendData)
@@ -274,11 +300,11 @@ const renderDistributionChart = (data) => {
 // 学生排名变化曲线
 const loadRankingTrend = async () => {
   try {
-    const res = await axios.get('/api/analytics/ranking-trend', {
+    const res = await request.get('/analytics/ranking-trend', {
       params: { studentName: selectedStudent.value }
     })
     
-    renderRankingChart(res.data.data)
+    renderRankingChart(res.data)
   } catch (error) {
     ElMessage.error('加载排名趋势失败')
   }
@@ -355,10 +381,10 @@ const renderRankingChart = (data) => {
 // 加载风险学生
 const loadRiskStudents = async () => {
   try {
-    const res = await axios.get('/api/analytics/risk-students', {
+    const res = await request.get('/analytics/risk-students', {
       params: { examName: selectedExam.value }
     })
-    riskStudents.value = res.data.data
+    riskStudents.value = res.data
   } catch (error) {
     ElMessage.error('加载风险学生失败')
   }
@@ -379,7 +405,7 @@ const viewStudentDetail = (row) => {
 
 onMounted(() => {
   nextTick(() => {
-    loadAnalytics()
+    loadExams()
     
     // 响应式调整
     window.addEventListener('resize', () => {

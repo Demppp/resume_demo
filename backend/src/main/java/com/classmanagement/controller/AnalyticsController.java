@@ -60,5 +60,20 @@ public class AnalyticsController {
         }
         return result;
     }
+
+    @GetMapping("/exams")
+    public Map<String, Object> getExamList() {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            List<String> exams = analyticsService.getExamList();
+            result.put("code", 200);
+            result.put("message", "success");
+            result.put("data", exams);
+        } catch (Exception e) {
+            result.put("code", 500);
+            result.put("message", "获取考试列表失败: " + e.getMessage());
+        }
+        return result;
+    }
 }
 

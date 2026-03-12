@@ -258,8 +258,15 @@ public class AnalyticsService {
             Map<String, Integer> levelOrder = Map.of("高风险", 1, "中风险", 2, "低风险", 3);
             return levelOrder.get(levelA).compareTo(levelOrder.get(levelB));
         });
-
         return riskStudents;
+    }
+
+    public List<String> getExamList() {
+        return examScoreMapper.selectList(new QueryWrapper<ExamScore>().select("distinct exam_name"))
+                .stream()
+                .map(ExamScore::getExamName)
+                .sorted(Comparator.reverseOrder())
+                .collect(Collectors.toList());
     }
 }
 

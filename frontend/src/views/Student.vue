@@ -5,6 +5,10 @@
         <div class="card-header">
           <span class="title">学生信息管理</span>
           <div class="header-actions">
+            <el-button type="warning" @click="handleExport">
+              <el-icon><Download /></el-icon>
+              导出 Excel
+            </el-button>
             <el-button type="primary" @click="showAddDialog">
               <el-icon><Plus /></el-icon>
               添加学生
@@ -46,7 +50,8 @@
         :data="tableData" 
         stripe 
         style="width: 100%"
-        :header-cell-style="{ background: '#f5f7fa', color: '#606266', fontWeight: '600' }"
+        v-loading="loading"
+        :header-cell-style="{ background: 'var(--bg-table-header, #f5f7fa)', color: 'var(--text-primary, #606266)', fontWeight: '600' }"
         :row-style="{ height: '55px' }"
       >
         <el-table-column type="index" label="序号" width="60" align="center" />
@@ -76,8 +81,12 @@
         </el-table-column>
         <el-table-column prop="address" label="地址" min-width="200" show-overflow-tooltip />
         <el-table-column prop="parentPhone" label="家长电话" width="130" align="center" />
-        <el-table-column label="操作" width="250" fixed="right" align="center">
+        <el-table-column label="操作" width="300" fixed="right" align="center">
           <template #default="{ row }">
+            <el-button type="info" size="small" @click="handleViewProfile(row)" link>
+              <el-icon><User /></el-icon>
+              档案
+            </el-button>
             <el-button type="success" size="small" @click="handleViewScores(row)" link>
               <el-icon><DataLine /></el-icon>
               查看成绩
@@ -232,9 +241,12 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getStudentList, addStudent, addStudentByAi, updateStudent, deleteStudent } from '@/api/student'
 import { getStudentScores } from '@/api/exam'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+import { Download, Plus, MagicStick, User, DataLine, Edit, Delete } from '@element-plus/icons-vue'
 
 const route = useRoute()
+const router = useRouter()
+const loading = ref(false)
 
 const tableData = ref([])
 const dialogVisible = ref(false)
@@ -266,6 +278,7 @@ const form = reactive({
 })
 
 const loadData = async () => {
+  loading.value = true
   try {
     const params = {
       pageNum: pagination.pageNum,
@@ -277,6 +290,8 @@ const loadData = async () => {
     pagination.total = res.data.total
   } catch (error) {
     ElMessage.error('加载数据失败')
+  } finally {
+    loading.value = false
   }
 }
 
@@ -384,6 +399,16 @@ const resetForm = () => {
   form.parentPhone = ''
 }
 
+const handleViewProfile = (row) => {
+  router.push(`/student-profile/${row.id}`)
+}
+
+const handleExport = () => {
+  const className = searchForm.className || ''
+  const url = `/api/export/students?className=${encodeURIComponent(className)}`
+  window.open(url, '_blank')
+}
+
 onMounted(() => {
   // 从URL参数中获取筛选条件
   if (route.query.className) {
@@ -416,7 +441,7 @@ onMounted(() => {
 .title {
   font-size: 18px;
   font-weight: 600;
-  color: #2c3e50;
+  color: var(--text-primary, #2c3e50);
 }
 
 .header-actions {

@@ -169,10 +169,10 @@ const showDemoHint = ref(false)
 
 // 演示场景列表
 const demoList = [
-  { command: 'demo1', text: '查看张伟的第一周周考成绩', icon: TrendCharts },
-  { command: 'demo2', text: '显示一班的学生列表', icon: User },
-  { command: 'demo3', text: '查看李娜最近的考勤记录', icon: Calendar },
-  { command: 'demo4', text: '打开二班的班干部日志', icon: Notebook }
+  { command: 'demo1', text: '查看张伟的第一次月考成绩', icon: TrendCharts },
+  { command: 'demo2', text: '显示高三1班的学生列表', icon: User },
+  { command: 'demo3', text: '查看李明的最近考勤记录', icon: Calendar },
+  { command: 'demo4', text: '打开高三2班的班干部日志', icon: Notebook }
 ]
 
 let blinkInterval = null
@@ -319,11 +319,11 @@ const startDemo1 = async () => {
     router.push('/exam')
     await sleep(2000)
     
-    showSpeechBubble('然后，搜索"张伟"的"第一周周考"', 2000)
+    showSpeechBubble('然后，搜索"张伟"的"第一次月考"', 2000)
     await sleep(2000)
     
     window.dispatchEvent(new CustomEvent('ai-demo-search', { 
-      detail: { studentName: '张伟', examName: '第一周周考' } 
+      detail: { studentName: '张伟', examName: '第一次月考' } 
     }))
     
     await sleep(2000)
@@ -347,7 +347,7 @@ const startDemo2 = async () => {
     
     showSpeechBubble('打开学生管理页面', 2000)
     await sleep(2000)
-    router.push('/student?className=一班')
+    router.push('/student?className=高三1班')
     await sleep(2000)
     
     showSpeechBubble('完成！这是一班的所有学生', 3000)
@@ -365,15 +365,15 @@ const startDemo3 = async () => {
   dialogVisible.value = false
   
   try {
-    showSpeechBubble('让我演示如何查看李娜的考勤', 3000)
+    showSpeechBubble('让我演示如何查看李明的考勤', 3000)
     await sleep(3000)
     
     showSpeechBubble('打开考勤管理页面', 2000)
     await sleep(2000)
-    router.push('/attendance?studentName=李娜')
+    router.push('/attendance?studentName=李明')
     await sleep(2000)
     
-    showSpeechBubble('完成！这是李娜的考勤记录', 3000)
+    showSpeechBubble('完成！这是李明的考勤记录', 3000)
     
   } catch (error) {
     ElMessage.error('演示失败')
@@ -393,7 +393,7 @@ const startDemo4 = async () => {
     
     showSpeechBubble('打开班干部日志页面', 2000)
     await sleep(2000)
-    router.push('/diary?className=二班')
+    router.push('/diary?className=高三2班')
     await sleep(2000)
     
     showSpeechBubble('完成！这是二班的班干部日志', 3000)

@@ -18,13 +18,16 @@ public class WarningController {
     private WarningService warningService;
 
     @GetMapping("/list")
-    public Map<String, Object> getWarningList() {
+    public Map<String, Object> getWarningList(
+            @RequestParam(defaultValue = "1") int pageNum,
+            @RequestParam(defaultValue = "10") int pageSize) {
         Map<String, Object> result = new HashMap<>();
         try {
-            List<WarningDTO> warnings = warningService.getWarningList();
+            com.baomidou.mybatisplus.extension.plugins.pagination.Page<WarningDTO> page = 
+                warningService.getWarningPage(pageNum, pageSize);
             result.put("code", 200);
             result.put("message", "success");
-            result.put("data", warnings);
+            result.put("data", page);
         } catch (Exception e) {
             result.put("code", 500);
             result.put("message", "获取预警数据失败: " + e.getMessage());
