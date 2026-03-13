@@ -305,7 +305,7 @@ const handleDemoCommand = (command) => {
   }
 }
 
-// 演示1：查看张伟的第一周周考成绩
+// 演示1：查看张伟的第一次月考成绩
 const startDemo1 = async () => {
   isDemoMode.value = true
   dialogVisible.value = false
@@ -327,7 +327,7 @@ const startDemo1 = async () => {
     }))
     
     await sleep(2000)
-    showSpeechBubble('完成！这就是张伟的第一周周考成绩', 3000)
+    showSpeechBubble('完成！这就是张伟的第一次月考成绩', 3000)
     
   } catch (error) {
     ElMessage.error('演示失败')
@@ -336,13 +336,13 @@ const startDemo1 = async () => {
   }
 }
 
-// 演示2：显示一班的学生列表
+// 演示2：显示高三1班的学生列表
 const startDemo2 = async () => {
   isDemoMode.value = true
   dialogVisible.value = false
   
   try {
-    showSpeechBubble('让我演示如何查看一班的学生', 3000)
+    showSpeechBubble('让我演示如何查看高三1班的学生', 3000)
     await sleep(3000)
     
     showSpeechBubble('打开学生管理页面', 2000)
@@ -350,7 +350,7 @@ const startDemo2 = async () => {
     router.push('/student?className=高三1班')
     await sleep(2000)
     
-    showSpeechBubble('完成！这是一班的所有学生', 3000)
+    showSpeechBubble('完成！这是高三1班的所有学生', 3000)
     
   } catch (error) {
     ElMessage.error('演示失败')
@@ -359,13 +359,13 @@ const startDemo2 = async () => {
   }
 }
 
-// 演示3：查看李娜最近的考勤记录
+// 演示3：查看李明的最近考勤记录
 const startDemo3 = async () => {
   isDemoMode.value = true
   dialogVisible.value = false
   
   try {
-    showSpeechBubble('让我演示如何查看李明的考勤', 3000)
+    showSpeechBubble('让我演示如何查看李明的考勤记录', 3000)
     await sleep(3000)
     
     showSpeechBubble('打开考勤管理页面', 2000)
@@ -382,13 +382,13 @@ const startDemo3 = async () => {
   }
 }
 
-// 演示4：打开二班的班干部日志
+// 演示4：查看高三2班的班干部日志
 const startDemo4 = async () => {
   isDemoMode.value = true
   dialogVisible.value = false
   
   try {
-    showSpeechBubble('让我演示如何查看二班的日志', 3000)
+    showSpeechBubble('让我演示如何查看高三2班的班干部日志', 3000)
     await sleep(3000)
     
     showSpeechBubble('打开班干部日志页面', 2000)
@@ -396,7 +396,7 @@ const startDemo4 = async () => {
     router.push('/diary?className=高三2班')
     await sleep(2000)
     
-    showSpeechBubble('完成！这是二班的班干部日志', 3000)
+    showSpeechBubble('完成！这是高三2班的班干部日志', 3000)
     
   } catch (error) {
     ElMessage.error('演示失败')
