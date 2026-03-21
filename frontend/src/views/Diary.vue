@@ -15,12 +15,12 @@
         <el-form :inline="true">
           <el-form-item label="班级">
             <el-select v-model="searchForm.className" placeholder="请选择班级" clearable style="width: 120px;">
-              <el-option label="一班" value="一班" />
-              <el-option label="二班" value="二班" />
-              <el-option label="三班" value="三班" />
-              <el-option label="四班" value="四班" />
-              <el-option label="五班" value="五班" />
-              <el-option label="六班" value="六班" />
+              <el-option label="高三1班" value="高三1班" />
+              <el-option label="高三2班" value="高三2班" />
+              <el-option label="高三3班" value="高三3班" />
+              <el-option label="高三4班" value="高三4班" />
+              <el-option label="高三5班" value="高三5班" />
+              <el-option label="高三6班" value="高三6班" />
             </el-select>
           </el-form-item>
           <el-form-item label="日期范围">
@@ -103,12 +103,12 @@
       <el-form :model="form" label-width="100px">
         <el-form-item label="班级" required>
           <el-select v-model="form.className" placeholder="请选择班级" style="width: 100%;">
-            <el-option label="一班" value="一班" />
-            <el-option label="二班" value="二班" />
-            <el-option label="三班" value="三班" />
-            <el-option label="四班" value="四班" />
-            <el-option label="五班" value="五班" />
-            <el-option label="六班" value="六班" />
+            <el-option label="高三1班" value="高三1班" />
+            <el-option label="高三2班" value="高三2班" />
+            <el-option label="高三3班" value="高三3班" />
+            <el-option label="高三4班" value="高三4班" />
+            <el-option label="高三5班" value="高三5班" />
+            <el-option label="高三6班" value="高三6班" />
           </el-select>
         </el-form-item>
         <el-form-item label="日期" required>
@@ -168,11 +168,11 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { getDiaryList, addDiary, updateDiary, deleteDiary } from '@/api/diary'
-import { useRoute } from 'vue-router'
-import { Plus, MagicStick, View, Edit, Delete } from '@element-plus/icons-vue'
+import {onMounted, onUnmounted, reactive, ref, watch} from 'vue'
+import {ElMessage, ElMessageBox} from 'element-plus'
+import {addDiary, deleteDiary, getDiaryList, updateDiary} from '@/api/diary'
+import {useRoute} from 'vue-router'
+import {Delete, Edit, MagicStick, Plus, View} from '@element-plus/icons-vue'
 
 const route = useRoute()
 
@@ -314,19 +314,43 @@ const resetForm = () => {
   form.diaryContent = ''
 }
 
-onMounted(() => {
+const initFromQuery = () => {
+  let hasQuery = false
   // 从URL参数中获取筛选条件
   if (route.query.className) {
     searchForm.className = route.query.className
+    hasQuery = true
   }
   
   // 如果有URL参数，自动触发搜索
-  if (route.query.className) {
+  if (hasQuery) {
     handleSearch()
-  } else {
+  } else if (!tableData.value.length) {
     loadData()
   }
+}
+
+const handleAiDemoSearch = (event) => {
+  const { className } = event.detail
+  if (className) searchForm.className = className
+  handleSearch()
+}
+
+onMounted(() => {
+  initFromQuery()
+  window.addEventListener('ai-demo-search', handleAiDemoSearch)
 })
+
+onUnmounted(() => {
+  window.removeEventListener('ai-demo-search', handleAiDemoSearch)
+})
+
+// 监听路由参数变化，处理在当前页面进行AI搜索的情况
+watch(() => route.query, () => {
+  if (Object.keys(route.query).length > 0) {
+    initFromQuery()
+  }
+}, { deep: true })
 </script>
 
 <style scoped>

@@ -82,10 +82,10 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import {onMounted, reactive, ref} from 'vue'
 import request from '@/api/request'
-import { ElMessage } from 'element-plus'
-import { List } from '@element-plus/icons-vue'
+import {ElMessage} from 'element-plus'
+import {List} from '@element-plus/icons-vue'
 
 const loading = ref(false)
 const tableData = ref([])

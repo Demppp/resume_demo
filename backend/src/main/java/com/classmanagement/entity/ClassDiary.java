@@ -1,29 +1,42 @@
 package com.classmanagement.entity;
 
-import com.baomidou.mybatisplus.annotation.*;
+import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.SQLRestriction;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
-@TableName("class_diary")
+@Entity
+@Table(name = "class_diary")
+@SQLRestriction("deleted = 0")
 public class ClassDiary {
-    @TableId(type = IdType.AUTO)
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
     private String className;
     private LocalDate diaryDate;
+
+    @Column(name = "author")
     private String recorderName;
+
+    @Column(name = "content", columnDefinition = "TEXT")
     private String diaryContent;
+
+    @Column(columnDefinition = "TEXT")
     private String aiSummary;
     
-    @TableField(fill = FieldFill.INSERT)
+    @CreationTimestamp
     private LocalDateTime createdTime;
     
-    @TableField(fill = FieldFill.INSERT_UPDATE)
+    @UpdateTimestamp
     private LocalDateTime updatedTime;
     
-    @TableLogic
-    private Integer deleted;
+    @Column(nullable = false, columnDefinition = "integer default 0")
+    private Integer deleted = 0;
 }
-

@@ -6,9 +6,9 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import {computed} from 'vue'
 import AIRobot from './components/AIRobot.vue'
-import { useThemeStore } from './stores/theme'
+import {useThemeStore} from './stores/theme'
 
 const themeStore = useThemeStore()
 const isDark = computed(() => themeStore.isDark)

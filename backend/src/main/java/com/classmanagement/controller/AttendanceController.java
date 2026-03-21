@@ -1,6 +1,6 @@
 package com.classmanagement.controller;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.classmanagement.dto.PageResult;
 import com.classmanagement.dto.Result;
 import com.classmanagement.entity.Attendance;
 import com.classmanagement.service.AttendanceService;
@@ -19,27 +19,24 @@ public class AttendanceController {
     private final AttendanceService attendanceService;
     
     @GetMapping("/list")
-    public Result<Page<Attendance>> getAttendanceList(
+    public Result<PageResult<Attendance>> getAttendanceList(
             @RequestParam(defaultValue = "1") int pageNum,
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(required = false) String className,
             @RequestParam(required = false) String studentName,
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate) {
-        Page<Attendance> page = attendanceService.getAttendanceList(pageNum, pageSize, className, studentName, startDate, endDate);
-        return Result.success(page);
+        return Result.success(attendanceService.getAttendanceList(pageNum, pageSize, className, studentName, startDate, endDate));
     }
     
     @PostMapping("/add")
     public Result<Attendance> addAttendance(@RequestBody Attendance attendance) {
-        Attendance result = attendanceService.addAttendance(attendance);
-        return Result.success("添加考勤记录成功", result);
+        return Result.success("添加考勤记录成功", attendanceService.addAttendance(attendance));
     }
     
     @PutMapping("/update")
     public Result<Attendance> updateAttendance(@RequestBody Attendance attendance) {
-        Attendance result = attendanceService.updateAttendance(attendance);
-        return Result.success("更新考勤记录成功", result);
+        return Result.success("更新考勤记录成功", attendanceService.updateAttendance(attendance));
     }
     
     @DeleteMapping("/delete/{id}")
@@ -50,8 +47,6 @@ public class AttendanceController {
     
     @GetMapping("/student/{studentId}")
     public Result<List<Attendance>> getStudentAttendance(@PathVariable Long studentId) {
-        List<Attendance> list = attendanceService.getStudentAttendance(studentId);
-        return Result.success(list);
+        return Result.success(attendanceService.getStudentAttendance(studentId));
     }
 }
-

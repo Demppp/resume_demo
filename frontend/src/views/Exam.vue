@@ -84,16 +84,18 @@
           </el-form-item>
           <el-form-item label="班级">
             <el-select v-model="searchForm.className" placeholder="请选择班级" clearable style="width: 120px;">
-              <el-option label="一班" value="一班" />
-              <el-option label="二班" value="二班" />
-              <el-option label="三班" value="三班" />
-              <el-option label="四班" value="四班" />
-              <el-option label="五班" value="五班" />
-              <el-option label="六班" value="六班" />
+              <el-option label="高三1班" value="高三1班" />
+              <el-option label="高三2班" value="高三2班" />
+              <el-option label="高三3班" value="高三3班" />
+              <el-option label="高三4班" value="高三4班" />
+              <el-option label="高三5班" value="高三5班" />
+              <el-option label="高三6班" value="高三6班" />
             </el-select>
           </el-form-item>
           <el-form-item label="考试名称">
-            <el-input v-model="searchForm.examName" placeholder="请输入考试名称" clearable style="width: 150px;" />
+            <el-select v-model="searchForm.examName" placeholder="请选择考试" clearable style="width: 150px;">
+              <el-option v-for="name in examNames" :key="name" :label="name" :value="name" />
+            </el-select>
           </el-form-item>
           <el-form-item label="重点关注">
             <el-select v-model="focusFilter" placeholder="筛选学生" clearable @change="handleSearch" style="width: 140px;">
@@ -266,12 +268,12 @@
           <el-col :span="12">
             <el-form-item label="班级" required>
               <el-select v-model="form.className" placeholder="请选择班级" style="width: 100%;">
-                <el-option label="一班" value="一班" />
-                <el-option label="二班" value="二班" />
-                <el-option label="三班" value="三班" />
-                <el-option label="四班" value="四班" />
-                <el-option label="五班" value="五班" />
-                <el-option label="六班" value="六班" />
+                <el-option label="高三1班" value="高三1班" />
+                <el-option label="高三2班" value="高三2班" />
+                <el-option label="高三3班" value="高三3班" />
+                <el-option label="高三4班" value="高三4班" />
+                <el-option label="高三5班" value="高三5班" />
+                <el-option label="高三6班" value="高三6班" />
               </el-select>
             </el-form-item>
           </el-col>
@@ -340,14 +342,22 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { getExamScoreList, addExamScore, updateExamScore, deleteExamScore, getExamStats } from '@/api/exam'
-import { useRoute, useRouter } from 'vue-router'
-import { 
-  TrendCharts, Trophy, DataLine, Warning, 
-  Download, Printer, Plus, Edit, Delete, 
-  CaretTop, CaretBottom 
+import {onMounted, reactive, ref, watch} from 'vue'
+import {ElMessage, ElMessageBox} from 'element-plus'
+import {addExamScore, deleteExamScore, getExamScoreList, getExamStats, updateExamScore} from '@/api/exam'
+import {useRoute, useRouter} from 'vue-router'
+import {
+  CaretBottom,
+  CaretTop,
+  DataLine,
+  Delete,
+  Download,
+  Edit,
+  Plus,
+  Printer,
+  TrendCharts,
+  Trophy,
+  Warning
 } from '@element-plus/icons-vue'
 
 const route = useRoute()
@@ -512,7 +522,24 @@ const applyFocusFilter = () => {
   tableData.value = filteredData
 }
 
+const examNames = ref([]) // 所有考试名称列表
+
+const loadExamNames = async () => {
+  try {
+    const namesRes = await getExamScoreList({ pageNum: 1, pageSize: 999 })
+    const names = [...new Set(namesRes.data.records.map(r => r.examName))].sort()
+    examNames.value = names
+  } catch (e) {}
+}
+
 const handleSearch = () => {
+  // 如果填了分数范围但没指定考试，自动补最新考试避免跨周排序混乱
+  if ((searchForm.minScore !== undefined || searchForm.maxScore !== undefined) && !searchForm.examName) {
+    if (examNames.value.length > 0) {
+      searchForm.examName = examNames.value[examNames.value.length - 1]
+      ElMessage.info(`已自动选择最新考试：${searchForm.examName}`)
+    }
+  }
   pagination.pageNum = 1
   loadData()
 }
@@ -602,31 +629,33 @@ const handlePrintReport = () => {
   router.push('/print-report')
 }
 
-onMounted(() => {
+const initFromQuery = async () => {
   // 从URL参数中获取筛选条件
-  if (route.query.examName) {
-    searchForm.examName = route.query.examName
-  }
-  if (route.query.className) {
-    searchForm.className = route.query.className
-  }
-  if (route.query.studentName) {
-    searchForm.studentName = route.query.studentName
-  }
-  if (route.query.minScore) {
-    searchForm.minScore = Number(route.query.minScore)
-    if (searchForm.minScore === 600) {
-      activeStatFilter.value = 'excellent'
+  searchForm.examName = route.query.examName || ''
+  searchForm.className = route.query.className || ''
+  searchForm.studentName = route.query.studentName || ''
+  searchForm.minScore = route.query.minScore ? Number(route.query.minScore) : undefined
+  searchForm.maxScore = route.query.maxScore ? Number(route.query.maxScore) : undefined
+
+  if (searchForm.minScore === 600) activeStatFilter.value = 'excellent'
+  else if (searchForm.maxScore === 499) activeStatFilter.value = 'needAttention'
+  else activeStatFilter.value = ''
+
+  // 若有分数范围但无考试名，等待考试名列表加载后自动补最新考试
+  if ((searchForm.minScore !== undefined || searchForm.maxScore !== undefined) && !searchForm.examName) {
+    if (examNames.value.length === 0) await loadExamNames()
+    if (examNames.value.length > 0) {
+      searchForm.examName = examNames.value[examNames.value.length - 1]
+      ElMessage.info(`已自动选择最新考试：${searchForm.examName}`)
     }
   }
-  if (route.query.maxScore) {
-    searchForm.maxScore = Number(route.query.maxScore)
-    if (searchForm.maxScore === 499) {
-      activeStatFilter.value = 'needAttention'
-    }
-  }
-  
+
   loadData()
+}
+
+onMounted(async () => {
+  await loadExamNames()
+  initFromQuery()
   
   // 监听AI演示事件
   window.addEventListener('ai-demo-search', (event) => {
@@ -636,6 +665,11 @@ onMounted(() => {
     handleSearch()
   })
 })
+
+// 监听路由参数变化，处理在当前页面进行AI搜索的情况
+watch(() => route.query, () => {
+  initFromQuery()
+}, { deep: true })
 </script>
 
 <style scoped>

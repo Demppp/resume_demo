@@ -266,9 +266,9 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import {onMounted, reactive, ref} from 'vue'
+import {useRouter} from 'vue-router'
+import {ElMessage} from 'element-plus'
 import axios from 'axios'
 
 const loading = ref(false)

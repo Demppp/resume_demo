@@ -1,15 +1,23 @@
 package com.classmanagement.entity;
 
-import com.baomidou.mybatisplus.annotation.*;
+import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.SQLRestriction;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
-@TableName("exam_score")
+@Entity
+@Table(name = "exam_score")
+@SQLRestriction("deleted = 0")
 public class ExamScore {
-    @TableId(type = IdType.AUTO)
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
     private Long studentId;
@@ -23,12 +31,12 @@ public class ExamScore {
     private BigDecimal englishScore;
     private BigDecimal comprehensiveScore;
     
-    // 理科：物理、化学、生物
+    // 理科
     private BigDecimal physicsScore;
     private BigDecimal chemistryScore;
     private BigDecimal biologyScore;
     
-    // 文科：政治、历史、地理
+    // 文科
     private BigDecimal politicsScore;
     private BigDecimal historyScore;
     private BigDecimal geographyScore;
@@ -37,15 +45,14 @@ public class ExamScore {
     private Integer classRank;
     private Integer gradeRank;
     private String predictedUniversity;
-    private Integer scoreChange;  // 与上次考试的分数变化
+    private Integer scoreChange;
     
-    @TableField(fill = FieldFill.INSERT)
+    @CreationTimestamp
     private LocalDateTime createdTime;
     
-    @TableField(fill = FieldFill.INSERT_UPDATE)
+    @UpdateTimestamp
     private LocalDateTime updatedTime;
     
-    @TableLogic
-    private Integer deleted;
+    @Column(nullable = false, columnDefinition = "integer default 0")
+    private Integer deleted = 0;
 }
-

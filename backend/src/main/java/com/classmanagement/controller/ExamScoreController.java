@@ -1,7 +1,7 @@
 package com.classmanagement.controller;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.classmanagement.dto.ExamScoreDTO;
+import com.classmanagement.dto.PageResult;
 import com.classmanagement.dto.Result;
 import com.classmanagement.entity.ExamScore;
 import com.classmanagement.service.ExamScoreService;
@@ -20,7 +20,7 @@ public class ExamScoreController {
     private final ExamScoreService examScoreService;
     
     @GetMapping("/list")
-    public Result<Page<ExamScoreDTO>> getExamScoreList(
+    public Result<PageResult<ExamScoreDTO>> getExamScoreList(
             @RequestParam(defaultValue = "1") int pageNum,
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(required = false) String className,
@@ -28,8 +28,7 @@ public class ExamScoreController {
             @RequestParam(required = false) String studentName,
             @RequestParam(required = false) BigDecimal minScore,
             @RequestParam(required = false) BigDecimal maxScore) {
-        Page<ExamScoreDTO> page = examScoreService.getExamScoreList(pageNum, pageSize, className, examName, studentName, minScore, maxScore);
-        return Result.success(page);
+        return Result.success(examScoreService.getExamScoreList(pageNum, pageSize, className, examName, studentName, minScore, maxScore));
     }
     
     @GetMapping("/stats")
@@ -39,20 +38,17 @@ public class ExamScoreController {
             @RequestParam(required = false) String studentName,
             @RequestParam(required = false) BigDecimal minScore,
             @RequestParam(required = false) BigDecimal maxScore) {
-        Map<String, Object> stats = examScoreService.getExamStats(className, examName, studentName, minScore, maxScore);
-        return Result.success(stats);
+        return Result.success(examScoreService.getExamStats(className, examName, studentName, minScore, maxScore));
     }
     
     @PostMapping("/add")
     public Result<ExamScore> addExamScore(@RequestBody ExamScore examScore) {
-        ExamScore result = examScoreService.addExamScore(examScore);
-        return Result.success("添加成绩成功", result);
+        return Result.success("添加成绩成功", examScoreService.addExamScore(examScore));
     }
     
     @PutMapping("/update")
     public Result<ExamScore> updateExamScore(@RequestBody ExamScore examScore) {
-        ExamScore result = examScoreService.updateExamScore(examScore);
-        return Result.success("更新成绩成功", result);
+        return Result.success("更新成绩成功", examScoreService.updateExamScore(examScore));
     }
     
     @DeleteMapping("/delete/{id}")
@@ -63,8 +59,6 @@ public class ExamScoreController {
     
     @GetMapping("/student/{studentId}")
     public Result<List<ExamScore>> getStudentScores(@PathVariable Long studentId) {
-        List<ExamScore> list = examScoreService.getStudentScores(studentId);
-        return Result.success(list);
+        return Result.success(examScoreService.getStudentScores(studentId));
     }
 }
-

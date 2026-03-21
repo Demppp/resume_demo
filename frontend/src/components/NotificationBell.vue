@@ -46,9 +46,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { getNotificationList, getUnreadCount, markAsRead, markAllAsRead } from '@/api/notification'
-import { Bell, WarningFilled, InfoFilled, CircleCheckFilled } from '@element-plus/icons-vue'
+import {onMounted, ref} from 'vue'
+import {getNotificationList, getUnreadCount, markAllAsRead, markAsRead} from '@/api/notification'
+import {Bell, CircleCheckFilled, InfoFilled, WarningFilled} from '@element-plus/icons-vue'
 
 const notifications = ref([])
 const unreadCount = ref(0)

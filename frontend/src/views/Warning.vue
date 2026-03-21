@@ -7,7 +7,10 @@
             <el-icon><Warning /></el-icon>
             预警系统
           </span>
-          <el-tag type="danger" size="large">实时监控</el-tag>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <el-tag type="danger" size="large">实时监控</el-tag>
+            <el-button v-if="handledCount > 0" size="small" plain type="info" @click="clearAllHandled">清除已处理 ({{ handledCount }})</el-button>
+          </div>
         </div>
       </template>
 
@@ -55,12 +58,12 @@
         <el-col :span="6">
           <el-card shadow="hover" class="stat-card">
             <div class="stat-content">
-              <div class="stat-icon" style="background: linear-gradient(135deg, #722ed1 0%, #531dab 100%);">
-                <el-icon :size="28"><DataLine /></el-icon>
+              <div class="stat-icon" style="background: linear-gradient(135deg, #52c41a 0%, #389e0d 100%);">
+                <el-icon :size="28"><CircleCheck /></el-icon>
               </div>
               <div class="stat-info">
-                <div class="stat-value">{{ warningStats.lowScore }}</div>
-                <div class="stat-label">成绩偏低</div>
+                <div class="stat-value">{{ handledCount }}</div>
+                <div class="stat-label">已处理</div>
               </div>
             </div>
           </el-card>
@@ -97,14 +100,21 @@
               </template>
             </el-table-column>
             <el-table-column prop="warningTime" label="预警时间" width="180" align="center" />
-            <el-table-column label="操作" width="200" align="center" fixed="right">
+            <el-table-column label="处理状态" width="110" align="center">
               <template #default="{ row }">
-                <el-button type="primary" size="small" link @click="viewDetail(row)">
-                  查看详情
-                </el-button>
-                <el-button type="success" size="small" link @click="handleWarning(row)">
-                  处理
-                </el-button>
+                <div v-if="isHandled(row)" class="handled-status">
+                  <el-tag type="success" size="small" effect="dark">✓ 已处理</el-tag>
+                  <div class="handled-time">{{ getHandledTime(row) }}</div>
+                </div>
+                <el-tag v-else type="danger" size="small" effect="plain">待处理</el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column label="操作" width="240" align="center" fixed="right">
+              <template #default="{ row }">
+                <el-button type="primary" size="small" link @click="viewDetail(row)">查看详情</el-button>
+                <el-button type="warning" size="small" link @click="openAiReport(row)">🤖 AI诊断</el-button>
+                <el-button v-if="!isHandled(row)" type="success" size="small" link @click="handleWarning(row)">处理</el-button>
+                <el-button v-else type="info" size="small" link @click="undoHandled(row)">撤销</el-button>
               </template>
             </el-table-column>
           </el-table>
@@ -141,11 +151,20 @@
                 </el-tag>
               </template>
             </el-table-column>
+            <el-table-column label="处理状态" width="110" align="center">
+              <template #default="{ row }">
+                <div v-if="isHandled(row)" class="handled-status">
+                  <el-tag type="success" size="small" effect="dark">✓ 已处理</el-tag>
+                  <div class="handled-time">{{ getHandledTime(row) }}</div>
+                </div>
+                <el-tag v-else type="danger" size="small" effect="plain">待处理</el-tag>
+              </template>
+            </el-table-column>
             <el-table-column label="操作" width="200" align="center">
               <template #default="{ row }">
-                <el-button type="primary" size="small" link @click="viewDetail(row)">
-                  查看详情
-                </el-button>
+                <el-button type="primary" size="small" link @click="viewDetail(row)">查看详情</el-button>
+                <el-button v-if="!isHandled(row)" type="success" size="small" link @click="handleWarning(row)">处理</el-button>
+                <el-button v-else type="info" size="small" link @click="undoHandled(row)">撤销</el-button>
               </template>
             </el-table-column>
           </el-table>
@@ -171,11 +190,20 @@
                 </el-tag>
               </template>
             </el-table-column>
+            <el-table-column label="处理状态" width="110" align="center">
+              <template #default="{ row }">
+                <div v-if="isHandled(row)" class="handled-status">
+                  <el-tag type="success" size="small" effect="dark">✓ 已处理</el-tag>
+                  <div class="handled-time">{{ getHandledTime(row) }}</div>
+                </div>
+                <el-tag v-else type="danger" size="small" effect="plain">待处理</el-tag>
+              </template>
+            </el-table-column>
             <el-table-column label="操作" width="200" align="center">
               <template #default="{ row }">
-                <el-button type="primary" size="small" link @click="viewDetail(row)">
-                  查看详情
-                </el-button>
+                <el-button type="primary" size="small" link @click="viewDetail(row)">查看详情</el-button>
+                <el-button v-if="!isHandled(row)" type="success" size="small" link @click="handleWarning(row)">处理</el-button>
+                <el-button v-else type="info" size="small" link @click="undoHandled(row)">撤销</el-button>
               </template>
             </el-table-column>
           </el-table>
@@ -201,26 +229,42 @@
                 </el-tag>
               </template>
             </el-table-column>
+            <el-table-column label="处理状态" width="110" align="center">
+              <template #default="{ row }">
+                <div v-if="isHandled(row)" class="handled-status">
+                  <el-tag type="success" size="small" effect="dark">✓ 已处理</el-tag>
+                  <div class="handled-time">{{ getHandledTime(row) }}</div>
+                </div>
+                <el-tag v-else type="danger" size="small" effect="plain">待处理</el-tag>
+              </template>
+            </el-table-column>
             <el-table-column label="操作" width="200" align="center">
               <template #default="{ row }">
-                <el-button type="primary" size="small" link @click="viewDetail(row)">
-                  查看详情
-                </el-button>
+                <el-button type="primary" size="small" link @click="viewDetail(row)">查看详情</el-button>
+                <el-button v-if="!isHandled(row)" type="success" size="small" link @click="handleWarning(row)">处理</el-button>
+                <el-button v-else type="info" size="small" link @click="undoHandled(row)">撤销</el-button>
               </template>
             </el-table-column>
           </el-table>
         </el-tab-pane>
       </el-tabs>
     </el-card>
-  </div>
+    <!-- AI 学情诊断报告弹窗 -->
+  <AIReportDialog
+    v-model="reportDialogVisible"
+    :student-id="currentStudentId"
+    :student-name="currentStudentName"
+  />
+</div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed } from 'vue'
-import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
-import { Warning, TrendCharts, Calendar, DataLine } from '@element-plus/icons-vue'
-import { getWarningList } from '@/api/warning'
+import {computed, onMounted, reactive, ref} from 'vue'
+import {useRouter} from 'vue-router'
+import {ElMessage} from 'element-plus'
+import {Calendar, CircleCheck, TrendCharts, Warning} from '@element-plus/icons-vue'
+import {getWarningList} from '@/api/warning'
+import AIReportDialog from '@/components/AIReportDialog.vue'
 
 const router = useRouter()
 const activeTab = ref('all')
@@ -243,20 +287,49 @@ const scoreWarnings = computed(() => allWarnings.value.filter(w => w.warningType
 const attendanceWarnings = computed(() => allWarnings.value.filter(w => w.warningType === '考勤异常'))
 const lowScoreWarnings = computed(() => allWarnings.value.filter(w => w.warningType === '成绩偏低'))
 
-// 移除客户端分页，数据已由后端分页返回
+// ── 处理状态持久化（localStorage）──
+const STORAGE_KEY = 'warning_handled_map'
+const handledMap = ref({})
+const loadHandledMap = () => {
+  try { handledMap.value = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}') } catch { handledMap.value = {} }
+}
+const saveHandledMap = () => localStorage.setItem(STORAGE_KEY, JSON.stringify(handledMap.value))
+const warningKey = (row) => `${row.studentId}_${row.warningType}_${row.className}`
+const isHandled = (row) => !!handledMap.value[warningKey(row)]
+const getHandledTime = (row) => handledMap.value[warningKey(row)]?.time || ''
+const handledCount = computed(() => Object.keys(handledMap.value).length)
+
+const handleWarning = (row) => {
+  handledMap.value = { ...handledMap.value, [warningKey(row)]: { time: new Date().toLocaleString('zh-CN', { hour12: false }).slice(0, 16) } }
+  saveHandledMap()
+  ElMessage.success(`已将 ${row.studentName} 的「${row.warningType}」预警标记为已处理`)
+}
+const undoHandled = (row) => {
+  const m = { ...handledMap.value }; delete m[warningKey(row)]; handledMap.value = m
+  saveHandledMap(); ElMessage.info(`已撤销 ${row.studentName} 的处理状态`)
+}
+const clearAllHandled = async () => {
+  try {
+    await (await import('element-plus')).ElMessageBox.confirm(`确定清除全部 ${handledCount.value} 条已处理记录？`, '清除确认', { confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning' })
+    handledMap.value = {}; saveHandledMap(); ElMessage.success('已清除全部处理记录')
+  } catch {}
+}
+const rowClassName = ({ row }) => isHandled(row) ? 'handled-row' : ''
+// ───────────────────────────────────────────────────────────
 
 const loadWarnings = async () => {
   try {
-    const res = await getWarningList({
-      pageNum: pagination.pageNum,
-      pageSize: pagination.pageSize
-    })
-    // 后端返回的是 Page 对象，数据在 records 中
+    // 加载当前页数据
+    const res = await getWarningList({ pageNum: pagination.pageNum, pageSize: pagination.pageSize })
     allWarnings.value = res.data.records
     pagination.total = res.data.total
-    
-    // 基础统计数据
-    warningStats.totalWarnings = pagination.total
+    warningStats.totalWarnings = res.data.total
+    // 加载全量数据用于统计各类型数量
+    const allRes = await getWarningList({ pageNum: 1, pageSize: 9999 })
+    const allRecords = allRes.data.records || []
+    warningStats.scoreDecline = allRecords.filter(w => w.warningType === '成绩下降' || w.warningType === '单科下降').length
+    warningStats.attendanceIssue = allRecords.filter(w => w.warningType === '考勤异常').length
+    warningStats.lowScore = allRecords.filter(w => w.warningType === '成绩偏低').length
   } catch (error) {
     ElMessage.error('加载预警数据失败')
   }
@@ -295,11 +368,25 @@ const viewDetail = (row) => {
   router.push(`/exam?studentName=${row.studentName}`)
 }
 
-const handleWarning = (row) => {
-  ElMessage.success('预警已标记为已处理')
+
+
+// AI 诊断报告
+const reportDialogVisible = ref(false)
+const currentStudentId = ref(null)
+const currentStudentName = ref('')
+
+const openAiReport = (row) => {
+  if (!row.studentId) {
+    ElMessage.warning('该预警记录缺少学生ID，无法生成报告')
+    return
+  }
+  currentStudentId.value = row.studentId
+  currentStudentName.value = row.studentName
+  reportDialogVisible.value = true
 }
 
 onMounted(() => {
+  loadHandledMap()
   loadWarnings()
 })
 </script>
@@ -403,5 +490,10 @@ onMounted(() => {
 :deep(.el-tabs__item) {
   font-weight: 500;
 }
+
+/* 已处理行样式 */
+:deep(.handled-row td) { opacity: 0.55; }
+.handled-status { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.handled-time { font-size: 10px; color: #aaa; line-height: 1.2; }
 </style>
 

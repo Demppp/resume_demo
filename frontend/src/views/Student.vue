@@ -25,12 +25,12 @@
         <el-form :inline="true">
           <el-form-item label="班级">
             <el-select v-model="searchForm.className" placeholder="请选择班级" clearable style="width: 120px;">
-              <el-option label="一班" value="一班" />
-              <el-option label="二班" value="二班" />
-              <el-option label="三班" value="三班" />
-              <el-option label="四班" value="四班" />
-              <el-option label="五班" value="五班" />
-              <el-option label="六班" value="六班" />
+              <el-option label="高三1班" value="高三1班" />
+              <el-option label="高三2班" value="高三2班" />
+              <el-option label="高三3班" value="高三3班" />
+              <el-option label="高三4班" value="高三4班" />
+              <el-option label="高三5班" value="高三5班" />
+              <el-option label="高三6班" value="高三6班" />
             </el-select>
           </el-form-item>
           <el-form-item label="科类">
@@ -130,12 +130,12 @@
         </el-form-item>
         <el-form-item label="班级" required>
           <el-select v-model="form.className" placeholder="请选择班级">
-            <el-option label="一班" value="一班" />
-            <el-option label="二班" value="二班" />
-            <el-option label="三班" value="三班" />
-            <el-option label="四班" value="四班" />
-            <el-option label="五班" value="五班" />
-            <el-option label="六班" value="六班" />
+            <el-option label="高三1班" value="高三1班" />
+            <el-option label="高三2班" value="高三2班" />
+            <el-option label="高三3班" value="高三3班" />
+            <el-option label="高三4班" value="高三4班" />
+            <el-option label="高三5班" value="高三5班" />
+            <el-option label="高三6班" value="高三6班" />
           </el-select>
         </el-form-item>
         <el-form-item label="地址">
@@ -159,7 +159,7 @@
             v-model="aiDescription"
             type="textarea"
             :rows="4"
-            placeholder="例如：张三，男，广州市天河区天河路123号，家长电话13800138000，一班，理科"
+            placeholder="例如：张三，男，广州市天河区天河路123号，家长电话13800138000，高三1班，理科"
           />
         </el-form-item>
         <el-alert
@@ -237,12 +237,12 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { getStudentList, addStudent, addStudentByAi, updateStudent, deleteStudent } from '@/api/student'
-import { getStudentScores } from '@/api/exam'
-import { useRoute, useRouter } from 'vue-router'
-import { Download, Plus, MagicStick, User, DataLine, Edit, Delete } from '@element-plus/icons-vue'
+import {onMounted, onUnmounted, reactive, ref, watch} from 'vue'
+import {ElMessage, ElMessageBox} from 'element-plus'
+import {addStudent, addStudentByAi, deleteStudent, getStudentList, updateStudent} from '@/api/student'
+import {getStudentScores} from '@/api/exam'
+import {useRoute, useRouter} from 'vue-router'
+import {DataLine, Delete, Download, Edit, MagicStick, Plus, User} from '@element-plus/icons-vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -409,22 +409,48 @@ const handleExport = () => {
   window.open(url, '_blank')
 }
 
-onMounted(() => {
+const initFromQuery = () => {
+  let hasQuery = false
   // 从URL参数中获取筛选条件
   if (route.query.className) {
     searchForm.className = route.query.className
+    hasQuery = true
   }
   if (route.query.classType) {
     searchForm.classType = route.query.classType
+    hasQuery = true
   }
   
   // 如果有URL参数，自动触发搜索
-  if (route.query.className || route.query.classType) {
+  if (hasQuery) {
     handleSearch()
-  } else {
+  } else if (!tableData.value.length) {
     loadData()
   }
+}
+
+const handleAiDemoSearch = (event) => {
+  const { className, classType } = event.detail
+  if (className) searchForm.className = className
+  if (classType) searchForm.classType = classType
+  handleSearch()
+}
+
+onMounted(() => {
+  initFromQuery()
+  window.addEventListener('ai-demo-search', handleAiDemoSearch)
 })
+
+onUnmounted(() => {
+  window.removeEventListener('ai-demo-search', handleAiDemoSearch)
+})
+
+// 监听路由参数变化，处理在当前页面进行AI搜索的情况
+watch(() => route.query, () => {
+  if (Object.keys(route.query).length > 0) {
+    initFromQuery()
+  }
+}, { deep: true })
 </script>
 
 <style scoped>

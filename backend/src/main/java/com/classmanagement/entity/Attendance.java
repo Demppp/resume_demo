@@ -1,14 +1,22 @@
 package com.classmanagement.entity;
 
-import com.baomidou.mybatisplus.annotation.*;
+import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.SQLRestriction;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
-@TableName("attendance")
+@Entity
+@Table(name = "attendance")
+@SQLRestriction("deleted = 0")
 public class Attendance {
-    @TableId(type = IdType.AUTO)
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
     private Long studentId;
@@ -18,13 +26,12 @@ public class Attendance {
     private String attendanceStatus;
     private String reason;
     
-    @TableField(fill = FieldFill.INSERT)
+    @CreationTimestamp
     private LocalDateTime createdTime;
     
-    @TableField(fill = FieldFill.INSERT_UPDATE)
+    @UpdateTimestamp
     private LocalDateTime updatedTime;
     
-    @TableLogic
-    private Integer deleted;
+    @Column(nullable = false, columnDefinition = "integer default 0")
+    private Integer deleted = 0;
 }
-

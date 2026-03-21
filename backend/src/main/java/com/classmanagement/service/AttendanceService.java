@@ -1,62 +1,77 @@
 package com.classmanagement.service;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.classmanagement.dto.PageResult;
 import com.classmanagement.entity.Attendance;
-import com.classmanagement.mapper.AttendanceMapper;
+import com.classmanagement.repository.AttendanceRepository;
+import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class AttendanceService {
     
-    private final AttendanceMapper attendanceMapper;
+    private final AttendanceRepository attendanceRepository;
+    private final StudentProfileEmbeddingService studentProfileEmbeddingService;
     
-    public Page<Attendance> getAttendanceList(int pageNum, int pageSize, String className, String studentName, LocalDate startDate, LocalDate endDate) {
-        Page<Attendance> page = new Page<>(pageNum, pageSize);
-        LambdaQueryWrapper<Attendance> wrapper = new LambdaQueryWrapper<>();
-        
-        if (className != null && !className.isEmpty()) {
-            wrapper.eq(Attendance::getClassName, className);
+    public PageResult<Attendance> getAttendanceList(int pageNum, int pageSize, String className, String studentName, LocalDate startDate, LocalDate endDate) {
+        Pageable pageable = PageRequest.of(Math.max(pageNum - 1, 0), pageSize, Sort.by(Sort.Direction.DESC, "attendanceDate"));
+        Specification<Attendance> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if (className != null && !className.isBlank()) {
+                predicates.add(cb.equal(root.get("className"), className));
         }
-        if (studentName != null && !studentName.isEmpty()) {
-            wrapper.like(Attendance::getStudentName, studentName);
+            if (studentName != null && !studentName.isBlank()) {
+                predicates.add(cb.like(root.get("studentName"), "%" + studentName + "%"));
         }
         if (startDate != null) {
-            wrapper.ge(Attendance::getAttendanceDate, startDate);
+                predicates.add(cb.greaterThanOrEqualTo(root.get("attendanceDate"), startDate));
         }
         if (endDate != null) {
-            wrapper.le(Attendance::getAttendanceDate, endDate);
+                predicates.add(cb.lessThanOrEqualTo(root.get("attendanceDate"), endDate));
         }
-        
-        wrapper.orderByDesc(Attendance::getAttendanceDate);
-        
-        return attendanceMapper.selectPage(page, wrapper);
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+        Page<Attendance> page = attendanceRepository.findAll(spec, pageable);
+        return PageResult.from(page);
     }
     
     public Attendance addAttendance(Attendance attendance) {
-        attendanceMapper.insert(attendance);
-        return attendance;
+        Attendance saved = attendanceRepository.save(attendance);
+        if (saved.getStudentId() != null) {
+            studentProfileEmbeddingService.buildAndSaveEmbedding(saved.getStudentId());
+        }
+        return saved;
     }
     
     public Attendance updateAttendance(Attendance attendance) {
-        attendanceMapper.updateById(attendance);
-        return attendance;
+        Attendance saved = attendanceRepository.save(attendance);
+        if (saved.getStudentId() != null) {
+            studentProfileEmbeddingService.buildAndSaveEmbedding(saved.getStudentId());
+        }
+        return saved;
     }
     
     public void deleteAttendance(Long id) {
-        attendanceMapper.deleteById(id);
+        Attendance attendance = attendanceRepository.findById(id).orElse(null);
+        if (attendance == null) return;
+        attendance.setDeleted(1);
+        attendanceRepository.save(attendance);
+        if (attendance.getStudentId() != null) {
+            studentProfileEmbeddingService.buildAndSaveEmbedding(attendance.getStudentId());
+        }
     }
     
     public List<Attendance> getStudentAttendance(Long studentId) {
-        LambdaQueryWrapper<Attendance> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Attendance::getStudentId, studentId)
-               .orderByDesc(Attendance::getAttendanceDate);
-        return attendanceMapper.selectList(wrapper);
+        return attendanceRepository.findByStudentIdOrderByAttendanceDateDesc(studentId);
     }
 }
-

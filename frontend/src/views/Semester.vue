@@ -60,10 +60,10 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import {onMounted, reactive, ref} from 'vue'
 import request from '@/api/request'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus, Clock } from '@element-plus/icons-vue'
+import {ElMessage, ElMessageBox} from 'element-plus'
+import {Clock, Plus} from '@element-plus/icons-vue'
 
 const loading = ref(false)
 const semesters = ref([])

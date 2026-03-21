@@ -112,14 +112,26 @@
 </template>
 
 <script setup>
-import { ref, watch, computed } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { useThemeStore } from '../stores/theme'
+import {computed, ref, watch} from 'vue'
+import {useRoute, useRouter} from 'vue-router'
+import {useThemeStore} from '../stores/theme'
 import NotificationBell from '../components/NotificationBell.vue'
-import { 
-  DataBoard, User, Calendar, Document, Notebook, 
-  Warning, DataAnalysis, List, Clock, Fold, 
-  Expand, Flag, Sunny, Moon, Monitor 
+import {
+  Calendar,
+  Clock,
+  DataAnalysis,
+  DataBoard,
+  Document,
+  Expand,
+  Flag,
+  Fold,
+  List,
+  Monitor,
+  Moon,
+  Notebook,
+  Sunny,
+  User,
+  Warning
 } from '@element-plus/icons-vue'
 
 const route = useRoute()

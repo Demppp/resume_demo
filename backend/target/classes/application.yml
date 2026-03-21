@@ -1,27 +1,32 @@
 spring:
   application:
     name: class-management-system
+
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://111.228.5.192:3306/resume_demo?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
-    username: root
-    password: p0@wls12ss
+    driver-class-name: org.postgresql.Driver
+    url: ${DB_URL:jdbc:postgresql://111.228.5.192:5432/resumeDemo}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:p0@wls12ss}
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 30000
+      connection-init-sql: SELECT 1
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          time_zone: Asia/Shanghai
   
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8
-
-# MyBatis Plus配置
-mybatis-plus:
-  configuration:
-    map-underscore-to-camel-case: true
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-  global-config:
-    db-config:
-      id-type: auto
-      logic-delete-field: deleted
-      logic-delete-value: 1
-      logic-not-delete-value: 0
 
 # 服务器配置
 server:
@@ -29,10 +34,20 @@ server:
   servlet:
     context-path: /api
 
-# LangChain配置 - 通义千问
+# LangChain4j 千问配置
 langchain:
   qwen:
-    api-key: ${QWEN_API_KEY:sk-cbc7273aedbe42d39d9410f0e3db6c9c}
+    api-key: ${QWEN_API_KEY:your-api-key-here}
     model-name: qwen-turbo
+    embedding-model-name: text-embedding-v3
     base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
 
+  # pgvector RAG 配置
+  pgvector:
+    host: ${DB_HOST:111.228.5.192}
+    port: ${DB_PORT:5432}
+    database: ${DB_NAME:resumeDemo}
+    user: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:p0@wls12ss}
+    table: langchain4j_embeddings   # LangChain4j 内置向量表（与业务向量表分开）
+    dimension: 1024

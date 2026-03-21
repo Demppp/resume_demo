@@ -1,14 +1,13 @@
 package com.classmanagement;
 
-import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 @SpringBootApplication
-@MapperScan("com.classmanagement.mapper")
+@EnableAsync
 public class ClassManagementApplication {
     public static void main(String[] args) {
         SpringApplication.run(ClassManagementApplication.class, args);
     }
 }
-

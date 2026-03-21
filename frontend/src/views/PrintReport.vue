@@ -6,7 +6,7 @@
           <span class="title">🖨️ 打印成绩单</span>
           <div>
             <el-select v-model="selectedClass" placeholder="选择班级" clearable style="width: 120px; margin-right: 12px;" @change="loadScores">
-              <el-option v-for="c in ['一班','二班','三班','四班','五班','六班']" :key="c" :label="c" :value="c" />
+              <el-option v-for="c in ['高三1班','高三2班','高三3班','高三4班','高三5班','高三6班']" :key="c" :label="c" :value="c" />
             </el-select>
             <el-select v-model="selectedExam" placeholder="选择考试" clearable style="width: 150px; margin-right: 12px;" @change="loadScores">
               <el-option v-for="e in examNames" :key="e" :label="e" :value="e" />
@@ -65,9 +65,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import {onMounted, ref} from 'vue'
 import axios from 'axios'
-import { ElMessage } from 'element-plus'
+import {ElMessage} from 'element-plus'
 
 const selectedClass = ref('')
 const selectedExam = ref('')

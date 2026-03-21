@@ -8,7 +8,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.1.5</version>
+        <version>3.2.5</version>
         <relativePath/>
     </parent>
 
@@ -16,13 +16,14 @@
     <artifactId>class-management-system</artifactId>
     <version>1.0.0</version>
     <name>Class Management System</name>
-    <description>高三班级管理系统</description>
+    <description>高三班级管理系统 - AI RAG 增强版</description>
 
     <properties>
         <java.version>17</java.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <langchain4j.version>0.36.2</langchain4j.version>
     </properties>
 
     <dependencies>
@@ -32,18 +33,24 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-        <!-- MySQL Driver -->
+        <!-- Spring Data JPA（替代 MyBatis-Plus） -->
         <dependency>
-            <groupId>com.mysql</groupId>
-            <artifactId>mysql-connector-j</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+
+        <!-- PostgreSQL Driver -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
         </dependency>
 
-        <!-- MyBatis Plus -->
+        <!-- pgvector Java 类型支持 -->
         <dependency>
-            <groupId>com.baomidou</groupId>
-            <artifactId>mybatis-plus-boot-starter</artifactId>
-            <version>3.5.4.1</version>
+            <groupId>com.pgvector</groupId>
+            <artifactId>pgvector</artifactId>
+            <version>0.1.6</version>
         </dependency>
 
         <!-- Lombok -->
@@ -53,17 +60,25 @@
             <optional>true</optional>
         </dependency>
 
-        <!-- LangChain4j for Qwen -->
+        <!-- LangChain4j 核心 -->
         <dependency>
             <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j</artifactId>
-            <version>0.25.0</version>
+            <version>${langchain4j.version}</version>
         </dependency>
 
+        <!-- LangChain4j OpenAI 兼容接口（用于千问） -->
         <dependency>
             <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j-open-ai</artifactId>
-            <version>0.25.0</version>
+            <version>${langchain4j.version}</version>
+        </dependency>
+
+        <!-- LangChain4j pgvector 向量存储 -->
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-pgvector</artifactId>
+            <version>${langchain4j.version}</version>
         </dependency>
 
         <!-- Validation -->
@@ -117,4 +132,3 @@
         </plugins>
     </build>
 </project>
-

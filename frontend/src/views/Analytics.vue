@@ -105,10 +105,10 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, nextTick, computed } from 'vue'
-import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
-import { DataAnalysis } from '@element-plus/icons-vue'
+import {computed, nextTick, onMounted, reactive, ref} from 'vue'
+import {useRouter} from 'vue-router'
+import {ElMessage} from 'element-plus'
+import {DataAnalysis} from '@element-plus/icons-vue'
 import request from '@/api/request'
 import * as echarts from 'echarts'
 

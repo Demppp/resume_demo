@@ -1,25 +1,40 @@
 package com.classmanagement.entity;
 
-import com.baomidou.mybatisplus.annotation.*;
+import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import java.time.LocalDateTime;
 
 @Data
-@TableName("operation_log")
+@Entity
+@Table(name = "operation_log")
 public class OperationLog {
-    @TableId(type = IdType.AUTO)
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String operationType;    // CREATE, UPDATE, DELETE
-    private String operationModule;  // student, exam, attendance, diary
-    private String operationDesc;    // 操作描述
-    private String operatorName;     // 操作人（暂默认"年级主任"）
-    private String requestMethod;    // GET, POST, PUT, DELETE
-    private String requestUrl;       // 请求地址
-    private String requestParams;    // 请求参数（JSON）
-    private String ipAddress;        // IP地址
-    private Long executionTime;      // 执行耗时(ms)
+    private String operationType;
+    private String operationModule;
+    private String operationDesc;
+    private String operatorName;
+    private String requestMethod;
+    private String requestUrl;
 
-    @TableField(fill = FieldFill.INSERT)
+    @Column(columnDefinition = "TEXT")
+    private String requestParams;
+
+    private String ipAddress;
+    private Long executionTime;
+
+    @CreationTimestamp
     private LocalDateTime createdTime;
+
+    @UpdateTimestamp
+    private LocalDateTime updatedTime;
+
+    @Column(nullable = false, columnDefinition = "integer default 0")
+    private Integer deleted = 0;
 }

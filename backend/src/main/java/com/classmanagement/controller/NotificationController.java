@@ -1,42 +1,46 @@
 package com.classmanagement.controller;
 
-import com.classmanagement.dto.Result;
-import com.classmanagement.entity.Notification;
-import com.classmanagement.service.NotificationService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 通知接口（面试展示版：返回空数据，避免前端报错）
+ */
 @RestController
 @RequestMapping("/notification")
-@RequiredArgsConstructor
 public class NotificationController {
 
-    private final NotificationService notificationService;
-
     @GetMapping("/list")
-    public Result<com.baomidou.mybatisplus.extension.plugins.pagination.Page<Notification>> getNotificationList(
-            @RequestParam(defaultValue = "1") int pageNum,
-            @RequestParam(defaultValue = "10") int pageSize) {
-        return Result.success(notificationService.getNotificationPage(pageNum, pageSize));
+    public Map<String, Object> list() {
+        return ok(List.of());
     }
 
     @GetMapping("/unread-count")
-    public Result<Map<String, Long>> getUnreadCount() {
-        return Result.success(Map.of("count", notificationService.getUnreadCount()));
+    public Map<String, Object> unreadCount() {
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put("count", 0);
+        return ok(data);
     }
 
-    @PutMapping("/read/{id}")
-    public Result<Void> markAsRead(@PathVariable Long id) {
-        notificationService.markAsRead(id);
-        return Result.success("已标记为已读", null);
+    @PostMapping("/read/{id}")
+    public Map<String, Object> markAsRead(@PathVariable Long id) {
+        return ok(null);
     }
 
-    @PutMapping("/read-all")
-    public Result<Void> markAllAsRead() {
-        notificationService.markAllAsRead();
-        return Result.success("全部标记为已读", null);
+    @PostMapping("/read-all")
+    public Map<String, Object> markAllAsRead() {
+        return ok(null);
+    }
+
+    private Map<String, Object> ok(Object data) {
+        Map<String, Object> res = new LinkedHashMap<>();
+        res.put("code", 200);
+        res.put("message", "操作成功");
+        res.put("data", data);
+        return res;
     }
 }
+

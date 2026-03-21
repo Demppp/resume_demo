@@ -1,29 +1,40 @@
 package com.classmanagement.entity;
 
-import com.baomidou.mybatisplus.annotation.*;
+import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.SQLRestriction;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import java.time.LocalDateTime;
 
 @Data
-@TableName("notification")
+@Entity
+@Table(name = "notification")
+@SQLRestriction("deleted = 0")
 public class Notification {
-    @TableId(type = IdType.AUTO)
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private Long studentId;
     private String studentName;
     private String className;
     private String title;
+
+    @Column(columnDefinition = "TEXT")
     private String content;
-    private String type;       // score, attendance, system, warning
+
+    private String type;
     private Boolean isRead;
 
-    @TableField(fill = FieldFill.INSERT)
+    @CreationTimestamp
     private LocalDateTime createdTime;
 
-    @TableField(fill = FieldFill.INSERT_UPDATE)
+    @UpdateTimestamp
     private LocalDateTime updatedTime;
 
-    @TableLogic
-    private Integer deleted;
+    @Column(nullable = false, columnDefinition = "integer default 0")
+    private Integer deleted = 0;
 }

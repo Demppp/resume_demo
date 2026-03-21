@@ -79,8 +79,8 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
+import {onMounted, onUnmounted, reactive, ref} from 'vue'
+import {useRouter} from 'vue-router'
 import request from '@/api/request'
 import * as echarts from 'echarts'
 

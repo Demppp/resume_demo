@@ -110,9 +110,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import {nextTick, onMounted, ref} from 'vue'
+import {useRoute, useRouter} from 'vue-router'
+import {ElMessage} from 'element-plus'
 import request from '@/api/request'
 import * as echarts from 'echarts'
 
