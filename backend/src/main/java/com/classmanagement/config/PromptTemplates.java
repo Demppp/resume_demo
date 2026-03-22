@@ -24,20 +24,20 @@ public class PromptTemplates {
      */
     public static final String INTENT_RECOGNITION =
         "你是高三年级管理系统的意图识别引擎。分析用户输入，返回 JSON，不要输出任何其他内容。\n\n" +
-        "可识别的 action 类型：\n" +
-        "- view_student_scores: 查看学生成绩\n" +
-        "- view_students: 查看学生列表\n" +
-        "- view_attendance: 查看考勤记录\n" +
-        "- view_diary: 查看班级日志\n" +
+        "可识别的 action 类型及对应路由：\n" +
+        "- view_student_scores: 查看学生成绩 -> /exam\n" +
+        "- view_students: 查看学生列表 -> /student\n" +
+        "- view_attendance: 查看考勤记录 -> /attendance\n" +
+        "- view_diary: 查看班级日志 -> /diary\n" +
         "- unknown: 无法识别时使用\n\n" +
-        "Few-shot 示例：\n" +
-        "输入: 帮我看张伟的成绩 -> {\"action\":\"view_student_scores\",\"studentName\":\"张伟\",\"description\":\"张伟的成绩记录\"}\n" +
-        "输入: 高三1班有哪些学生 -> {\"action\":\"view_students\",\"className\":\"高三1班\",\"description\":\"高三1班学生列表\"}\n" +
-        "输入: 查看吴平的考勤记录 -> {\"action\":\"view_attendance\",\"studentName\":\"吴平\",\"description\":\"吴平的考勤记录\"}\n" +
-        "输入: 高三2班的考勤 -> {\"action\":\"view_attendance\",\"className\":\"高三2班\",\"description\":\"高三2班考勤记录\"}\n" +
+        "Few-shot 示例（必须包含 route 字段）：\n" +
+        "输入: 帮我看张伟的成绩 -> {\"action\":\"view_student_scores\",\"route\":\"/exam?studentName=张伟\",\"description\":\"张伟的成绩记录\"}\n" +
+        "输入: 高三1班有哪些学生 -> {\"action\":\"view_students\",\"route\":\"/student?className=高三1班\",\"description\":\"高三1班学生列表\"}\n" +
+        "输入: 查看宋杰的考勤记录 -> {\"action\":\"view_attendance\",\"route\":\"/attendance?studentName=宋杰\",\"description\":\"宋杰的考勤记录\"}\n" +
+        "输入: 高三2班的考勤 -> {\"action\":\"view_attendance\",\"route\":\"/attendance?className=高三2班\",\"description\":\"高三2班考勤记录\"}\n" +
         "输入: 请问今天天气 -> {\"action\":\"unknown\",\"description\":\"该问题超出系统能力范围\"}\n\n" +
         "用户输入：%s\n\n" +
-        "只返回 JSON，字段：action, studentName(可空), className(可空，格式必须是高三X班), examName(可空), description。";
+        "只返回 JSON，字段：action, route(识别成功时必须包含，格式为 /path?param=value), description。";
 
     /**
      * 学情分析报告 Prompt

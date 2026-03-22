@@ -37,7 +37,7 @@ server:
 # LangChain4j 千问配置
 langchain:
   qwen:
-    api-key: ${QWEN_API_KEY:your-api-key-here}
+    api-key: ${QWEN_API_KEY:sk-21c16f7ec89f401d93a7738d44d159b8}
     model-name: qwen-turbo
     embedding-model-name: text-embedding-v3
     base-url: https://dashscope.aliyuncs.com/compatible-mode/v1

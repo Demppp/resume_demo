@@ -259,7 +259,7 @@ const isLoading = ref(false)
 const activeTab = ref('chat')
 
 const quickQuestions = [
-  '查看吴平的考勤记录',
+  '查看刘梦的考勤记录',
   '帮我看高三1班的学生列表',
   '迟到最多的学生是谁？',
   '分析一下年级整体成绩趋势'
